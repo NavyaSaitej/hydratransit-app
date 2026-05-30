@@ -1,6 +1,8 @@
 # HydraTransit App
 This is the HydraTransit application — a multi-modal transit orchestrator and green-mobility dashboard for Hyderabad, Telangana. It integrates Hyderabad Metro Rail, TSRTC Express Buses, MMTS local trains, and last-mile micro-mobility (electric bikes & shared autos) into a seamless commuting experience, while incentivizing public transit usage through a gamified Carbon Credits reward system.
 
+Website Link:- https://hydratransit.vercel.app/
+
 ## Features
 
 - **Multi-Modal Route Planner**: Compiles hybrid journeys (e.g., *Bus → Metro → E-Bike*), calculating total duration, cost, and exact carbon savings dynamically.
