@@ -115,6 +115,55 @@ const PASS_TYPES = [
     { id:'monthly', name:'Monthly', price:'₹999', desc:'30 days unlimited', gradient:'linear-gradient(135deg,#43e97b,#38f9d7)', icon:'🗓️', best:true },
 ];
 
+// ─── LOCALIZATION ────────────────────────────────────────────────────────
+const TRANSLATIONS = {
+    en: {
+        tab_plan: "Plan", tab_pass: "Pass", tab_eco: "Eco", tab_live: "Live",
+        search_from: "Where from?", search_to: "Where to?",
+        search_btn: "Find Best Routes", book_btn: "Get HydraPass for Selected",
+        pass_type_title: "Select Pass Type", active_pass_title: "Your Active Pass",
+        eco_pts: "Eco Points", co2_saved: "CO₂ Saved",
+        day_streak: "Day Streak", daily_cap: "Daily Cap",
+        rewards_store: "Rewards Store", coach_density: "Coach Density"
+    },
+    te: {
+        tab_plan: "ప్లాన్", tab_pass: "పాస్", tab_eco: "ఎకో", tab_live: "లైవ్",
+        search_from: "ఎక్కడి నుండి?", search_to: "ఎక్కడికి?",
+        search_btn: "ఉత్తమ మార్గాలను కనుగొనండి", book_btn: "ఎంచుకున్న దానికి హైడ్రాపాస్ పొందండి",
+        pass_type_title: "పాస్ రకాన్ని ఎంచుకోండి", active_pass_title: "మీ యాక్టివ్ పాస్",
+        eco_pts: "ఎకో పాయింట్లు", co2_saved: "CO₂ ఆదా చేయబడింది",
+        day_streak: "డే స్ట్రీక్", daily_cap: "రోజువారీ పరిమితి",
+        rewards_store: "రివార్డ్స్ స్టోర్", coach_density: "కోచ్ రద్దీ"
+    },
+    hi: {
+        tab_plan: "योजना", tab_pass: "पास", tab_eco: "इको", tab_live: "लाइव",
+        search_from: "कहाँ से?", search_to: "कहाँ तक?",
+        search_btn: "सर्वोत्तम मार्ग खोजें", book_btn: "चयनित के लिए हाइड्रापास प्राप्त करें",
+        pass_type_title: "पास प्रकार चुनें", active_pass_title: "आपका सक्रिय पास",
+        eco_pts: "इको पॉइंट्स", co2_saved: "CO₂ बचाया गया",
+        day_streak: "डे स्ट्रीक", daily_cap: "दैनिक सीमा",
+        rewards_store: "रिवॉर्ड्स स्टोर", coach_density: "कोच घनत्व"
+    }
+};
+
+function setLanguage(lang) {
+    localStorage.setItem('ht_lang', lang);
+    const selectEl = document.getElementById('lang-switcher');
+    if (selectEl) selectEl.value = lang;
+    
+    const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+    });
+    
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (dict[key]) el.placeholder = dict[key];
+    });
+}
+
 // ─── APP STATE ───────────────────────────────────────────────────────────
 let map, directionsService, originAutocomplete, destAutocomplete;
 let originPlace = null, destPlace = null;
@@ -136,10 +185,12 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: 17.4100, lng: 78.4500 },
         zoom: 12,
-        styles: DARK_MAP_STYLE,
+        mapId: "DEMO_MAP_ID",
+        isFractionalZoomEnabled: true,
         disableDefaultUI: true,
         zoomControl: true,
         zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+        gestureHandling: 'greedy',
         mapTypeControl: false,
         fullscreenControl: false,
     });
@@ -152,6 +203,7 @@ function initMap() {
     renderPassTypes();
     updateWalletUI();
     resetDailyCaps();
+    setLanguage(localStorage.getItem('ht_lang') || 'en');
 
     showToast('HydraTransit Ready', 'Google Maps loaded — search any address in Hyderabad.');
 }
@@ -716,7 +768,15 @@ function drawRouteOnMap(route) {
         bounds.extend(destPlace.geometry.location);
     }
 
-    map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 } });
+    const currentCenter = map.getCenter();
+    if (currentCenter) {
+        map.panTo(bounds.getCenter());
+        setTimeout(() => {
+            map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 } });
+        }, 200);
+    } else {
+        map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 } });
+    }
 }
 
 // ─── HYDRAPASS TICKET ────────────────────────────────────────────────────

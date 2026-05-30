@@ -4,38 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HydraTransit - Premium Hyderabad Commute</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div id="app-layout">
         <!-- SIDEBAR -->
         <aside id="sidebar">
             <div class="sb-header">
-                <div class="sb-brand">
-                    <i class="fa-solid fa-route"></i> HydraTransit
+                <div class="sb-brand" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span><i class="fa-solid fa-route"></i> HydraTransit</span>
+                    <select id="lang-switcher" onchange="setLanguage(this.value)" class="lang-select">
+                        <option value="en">EN</option>
+                        <option value="te">TE</option>
+                        <option value="hi">HI</option>
+                    </select>
                 </div>
             </div>
             
             <div class="sb-tabs">
-                <button class="tab-btn active" onclick="switchTab('plan')"><i class="fa-solid fa-magnifying-glass"></i> Plan</button>
-                <button class="tab-btn" onclick="switchTab('pass')"><i class="fa-solid fa-ticket"></i> Pass</button>
-                <button class="tab-btn" onclick="switchTab('eco')"><i class="fa-solid fa-leaf"></i> Eco</button>
-                <button class="tab-btn" onclick="switchTab('ble')"><i class="fa-solid fa-satellite-dish"></i> Live</button>
+                <button class="tab-btn active" onclick="switchTab('plan')"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="tab_plan">Plan</span></button>
+                <button class="tab-btn" onclick="switchTab('pass')"><i class="fa-solid fa-ticket"></i> <span data-i18n="tab_pass">Pass</span></button>
+                <button class="tab-btn" onclick="switchTab('eco')"><i class="fa-solid fa-leaf"></i> <span data-i18n="tab_eco">Eco</span></button>
+                <button class="tab-btn" onclick="switchTab('ble')"><i class="fa-solid fa-satellite-dish"></i> <span data-i18n="tab_live">Live</span></button>
             </div>
 
             <!-- TAB: PLAN JOURNEY -->
             <div id="tab-plan" class="tab-content active">
                 <div class="search-box">
                     <div class="input-group">
-                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off">
+                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off" data-i18n-placeholder="search_from">
                         <i class="fa-solid fa-location-dot"></i>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off">
+                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off" data-i18n-placeholder="search_to">
                         <i class="fa-solid fa-flag-checkered"></i>
                     </div>
-                    <button class="search-btn" onclick="triggerSearch()">Find Best Routes</button>
+                    <button class="search-btn" onclick="triggerSearch()" data-i18n="search_btn">Find Best Routes</button>
                 </div>
                 <div id="routes-list" class="routes-container">
                     <!-- Route cards injected here -->
@@ -44,17 +53,17 @@
                         Enter any address in Hyderabad to find multi-modal transit routes.
                     </div>
                 </div>
-                <button id="book-btn" class="search-btn" style="margin-top:20px;" onclick="purchasePass()" disabled>Get HydraPass for Selected</button>
+                <button id="book-btn" class="search-btn" style="margin-top:20px;" onclick="purchasePass()" disabled data-i18n="book_btn">Get HydraPass for Selected</button>
             </div>
 
             <!-- TAB: HYDRAPASS -->
             <div id="tab-pass" class="tab-content">
-                <div class="section-title">Select Pass Type</div>
+                <div class="section-title" data-i18n="pass_type_title">Select Pass Type</div>
                 <div id="pass-type-grid" class="pass-type-grid"></div>
                 <div id="pass-invoice" class="pass-invoice">
                     <div style="text-align:center;color:var(--text-tertiary);">Select a route first</div>
                 </div>
-                <div class="section-title">Your Active Pass</div>
+                <div class="section-title" data-i18n="active_pass_title">Your Active Pass</div>
                 <div id="ticket-card-area">
                     <div style="text-align:center; padding: 30px; background: var(--surface-raised); border-radius: 16px; border: 1px dashed var(--border-subtle); color: var(--text-tertiary); font-size: 12px;">
                         No active passes.<br>Book a route to generate a HydraPass.
@@ -67,22 +76,22 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-val"><span id="user-pts">0</span> <i class="fa-solid fa-coins" style="font-size:14px; color:var(--color-primary)"></i></div>
-                        <div class="stat-label">Eco Points</div>
+                        <div class="stat-label" data-i18n="eco_pts">Eco Points</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val eco"><span id="user-co2">0.0</span> <span style="font-size:14px;">kg</span></div>
-                        <div class="stat-label">CO₂ Saved</div>
+                        <div class="stat-label" data-i18n="co2_saved">CO₂ Saved</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val"><span id="streak-val">0</span> <i class="fa-solid fa-fire" style="font-size:14px; color:#F44336"></i></div>
-                        <div class="stat-label">Day Streak</div>
+                        <div class="stat-label" data-i18n="day_streak">Day Streak</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val" style="color:var(--text-primary);"><span id="daily-cap">0/20</span></div>
-                        <div class="stat-label">Daily Cap</div>
+                        <div class="stat-label" data-i18n="daily_cap">Daily Cap</div>
                     </div>
                 </div>
-                <div class="section-title">Rewards Store</div>
+                <div class="section-title" data-i18n="rewards_store">Rewards Store</div>
                 <div id="store-list" class="store-list"></div>
             </div>
 
@@ -93,7 +102,7 @@
                     <div>Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                    <div class="section-title" style="margin:0;">Coach Density</div>
+                    <div class="section-title" style="margin:0;" data-i18n="coach_density">Coach Density</div>
                     <span id="ble-timer" style="font-size:10px; font-weight:700; color:var(--color-primary);">Scanning... 3s</span>
                 </div>
                 <div id="coach-list" class="coach-list"></div>
@@ -118,5 +127,14 @@
     <!-- SCRIPTS -->
     <script src="app.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnZY3jsHmETt-mbEBKMpaRMGKEiuwCsvc&libraries=places&callback=initMap"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('SW registered:', reg);
+          }).catch(err => console.log('SW config error:', err));
+        });
+      }
+    </script>
 </body>
 </html>
