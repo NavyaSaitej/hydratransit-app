@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydraTransit - Premium Hyderabad Commute</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app-layout">
+        <!-- SIDEBAR -->
+        <aside id="sidebar">
+            <div class="sb-header">
+                <div class="sb-brand">
+                    <i class="fa-solid fa-route"></i> HydraTransit
+                </div>
+            </div>
+            
+            <div class="sb-tabs">
+                <button class="tab-btn active" onclick="switchTab('plan')"><i class="fa-solid fa-magnifying-glass"></i> Plan</button>
+                <button class="tab-btn" onclick="switchTab('pass')"><i class="fa-solid fa-ticket"></i> Pass</button>
+                <button class="tab-btn" onclick="switchTab('eco')"><i class="fa-solid fa-leaf"></i> Eco</button>
+                <button class="tab-btn" onclick="switchTab('ble')"><i class="fa-solid fa-satellite-dish"></i> Live</button>
+            </div>
+
+            <!-- TAB: PLAN JOURNEY -->
+            <div id="tab-plan" class="tab-content active">
+                <div class="search-box">
+                    <div class="input-group">
+                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off">
+                        <i class="fa-solid fa-flag-checkered"></i>
+                    </div>
+                    <button class="search-btn" onclick="triggerSearch()">Find Best Routes</button>
+                </div>
+                <div id="routes-list" class="routes-container">
+                    <!-- Route cards injected here -->
+                    <div style="text-align:center; padding: 20px; color: var(--text-tertiary); font-size: 13px;">
+                        <i class="fa-solid fa-map-location-dot" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i><br>
+                        Enter any address in Hyderabad to find multi-modal transit routes.
+                    </div>
+                </div>
+                <button id="book-btn" class="search-btn" style="margin-top:20px;" onclick="purchasePass()" disabled>Get HydraPass for Selected</button>
+            </div>
+
+            <!-- TAB: HYDRAPASS -->
+            <div id="tab-pass" class="tab-content">
+                <div class="section-title">Select Pass Type</div>
+                <div id="pass-type-grid" class="pass-type-grid"></div>
+                <div id="pass-invoice" class="pass-invoice">
+                    <div style="text-align:center;color:var(--text-tertiary);">Select a route first</div>
+                </div>
+                <div class="section-title">Your Active Pass</div>
+                <div id="ticket-card-area">
+                    <div style="text-align:center; padding: 30px; background: var(--surface-raised); border-radius: 16px; border: 1px dashed var(--border-subtle); color: var(--text-tertiary); font-size: 12px;">
+                        No active passes.<br>Book a route to generate a HydraPass.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: ECO CREDITS -->
+            <div id="tab-eco" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val"><span id="user-pts">0</span> <i class="fa-solid fa-coins" style="font-size:14px; color:var(--color-primary)"></i></div>
+                        <div class="stat-label">Eco Points</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val eco"><span id="user-co2">0.0</span> <span style="font-size:14px;">kg</span></div>
+                        <div class="stat-label">CO₂ Saved</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val"><span id="streak-val">0</span> <i class="fa-solid fa-fire" style="font-size:14px; color:#F44336"></i></div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--text-primary);"><span id="daily-cap">0/20</span></div>
+                        <div class="stat-label">Daily Cap</div>
+                    </div>
+                </div>
+                <div class="section-title">Rewards Store</div>
+                <div id="store-list" class="store-list"></div>
+            </div>
+
+            <!-- TAB: BLE RADAR -->
+            <div id="tab-ble" class="tab-content">
+                <div style="background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 10px; font-size: 12px; color: #90CAF9;">
+                    <i class="fa-solid fa-tower-broadcast" style="font-size: 16px; margin-top:2px;"></i>
+                    <div>Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                    <div class="section-title" style="margin:0;">Coach Density</div>
+                    <span id="ble-timer" style="font-size:10px; font-weight:700; color:var(--color-primary);">Scanning... 3s</span>
+                </div>
+                <div id="coach-list" class="coach-list"></div>
+            </div>
+        </aside>
+
+        <!-- MAP CONTAINER -->
+        <main id="map-container">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+            <h5 id="toast-title">Success</h5>
+            <p id="toast-desc">Action completed.</p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="app.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnZY3jsHmETt-mbEBKMpaRMGKEiuwCsvc&libraries=places&callback=initMap"></script>
+</body>
+</html>
