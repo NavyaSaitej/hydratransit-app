@@ -1,4 +1,4 @@
-# Contributing to HydraTransi
+# Contributing to HydraTransit
 Thank you for your interest in contributing to the HydraTransit project! This document provides guidelines and information for contributors.
 
 ## 🚀 Quick Start
