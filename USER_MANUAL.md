@@ -51,4 +51,4 @@ HydraTransit is a Progressive Web App (PWA). You don't need to download it from 
 - **On Desktop (Chrome/Edge):** Look for the install icon (a screen with a down arrow) in the right side of your URL bar.
 
 ---
-*Happy Commuting!*
+*Happy Commuting*
