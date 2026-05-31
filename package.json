@@ -1,0 +1,16 @@
+{
+  "name": "hydratransit-app",
+  "version": "3.0.0",
+  "description": "Multi-modal transit app for Hyderabad",
+  "scripts": {
+    "test": "echo 'No tests currently'",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "typecheck": "knip"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "knip": "^5.0.0"
+  }
+}
