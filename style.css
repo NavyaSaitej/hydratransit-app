@@ -348,6 +348,121 @@ body {
 }
 .store-cost:hover { background: #4CAF50; color: #000; }
 
+/* ─── STREAK MILESTONES ─── */
+.streak-milestones {
+  display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto;
+  padding-bottom: 4px;
+}
+.streak-milestones::-webkit-scrollbar { height: 3px; }
+
+.milestone-card {
+  flex: 0 0 auto; width: 78px; text-align: center;
+  background: var(--surface-raised); border-radius: 12px; padding: 10px 6px;
+  border: 1px solid var(--border-subtle); position: relative; transition: all 0.3s;
+}
+.milestone-card.achieved {
+  border-color: rgba(76,175,80,0.4);
+  box-shadow: 0 0 12px rgba(76,175,80,0.15);
+}
+.milestone-card.current {
+  border-color: rgba(251,146,60,0.5);
+  box-shadow: 0 0 12px rgba(251,146,60,0.2);
+}
+.ms-ring {
+  width: 42px; height: 42px; border-radius: 50%; margin: 0 auto 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; position: relative;
+  background: conic-gradient(var(--ms-color, #4CAF50) var(--ms-progress, 0%), var(--border-subtle) 0%);
+}
+.ms-ring-inner {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--surface-raised); display: flex;
+  align-items: center; justify-content: center; font-size: 16px;
+}
+.ms-label { font-size: 10px; font-weight: 700; color: var(--text-secondary); margin-bottom: 2px; }
+.ms-bonus { font-size: 9px; font-weight: 600; color: var(--color-primary); }
+.milestone-card.achieved .ms-label { color: #4CAF50; }
+.milestone-card.achieved .ms-ring { --ms-color: #4CAF50; --ms-progress: 100%; }
+
+/* ─── STREAK CALENDAR ─── */
+.streak-calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  margin-bottom: 20px;
+}
+.streak-day {
+  aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font-size: 10px; font-weight: 600;
+  background: var(--surface-raised); border: 1px solid var(--border-subtle);
+  color: var(--text-tertiary); transition: all 0.3s; position: relative;
+}
+.streak-day .day-num { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+.streak-day .day-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.streak-day.active {
+  background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(16,185,129,0.15));
+  border-color: rgba(76,175,80,0.4); color: #4CAF50;
+}
+.streak-day.active .day-num { color: #4CAF50; }
+.streak-day.today {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px rgba(251,146,60,0.2);
+}
+.streak-day.today .day-num { color: var(--color-primary); }
+.streak-day.future { opacity: 0.35; }
+.streak-fire {
+  position: absolute; top: -4px; right: -2px; font-size: 10px;
+  animation: fireFlicker 1.5s ease-in-out infinite;
+}
+@keyframes fireFlicker {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2) rotate(8deg); }
+}
+
+/* ─── E-BIKE AVAILABILITY ─── */
+.ebike-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.ebike-card {
+  background: var(--surface-raised); border-radius: 10px; padding: 12px;
+  border: 1px solid var(--border-subtle); display: flex; gap: 12px;
+  align-items: center; transition: all 0.2s;
+}
+.ebike-card:hover { border-color: rgba(76,175,80,0.3); transform: translateX(2px); }
+.ebike-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.ebike-icon.bounce { background: rgba(76,175,80,0.15); }
+.ebike-icon.yulu { background: rgba(33,150,243,0.15); }
+.ebike-icon.metro { background: rgba(251,146,60,0.15); }
+.ebike-details { flex: 1; min-width: 0; }
+.ebike-station { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ebike-provider { font-size: 10px; color: var(--text-tertiary); margin-bottom: 5px; }
+.ebike-meta { display: flex; gap: 8px; align-items: center; }
+.ebike-avail {
+  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+}
+.ebike-avail.high { background: rgba(76,175,80,0.15); color: #4CAF50; }
+.ebike-avail.mid { background: rgba(255,193,7,0.15); color: #FFC107; }
+.ebike-avail.low { background: rgba(244,67,54,0.15); color: #F44336; }
+.ebike-battery {
+  display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-secondary);
+}
+.battery-gauge {
+  width: 28px; height: 12px; border-radius: 2px; border: 1.5px solid var(--text-tertiary);
+  position: relative; overflow: hidden;
+}
+.battery-gauge::after {
+  content: ''; position: absolute; right: -4px; top: 3px;
+  width: 2px; height: 4px; background: var(--text-tertiary); border-radius: 0 1px 1px 0;
+}
+.battery-fill {
+  height: 100%; border-radius: 1px; transition: width 0.5s ease;
+}
+.battery-fill.high { background: #4CAF50; }
+.battery-fill.mid { background: #FFC107; }
+.battery-fill.low { background: #F44336; }
+body.light-mode .ebike-station { color: #0F172A; }
+
 .coach-list { display: flex; flex-direction: column; gap: 8px; }
 .coach-row {
   background: var(--surface-raised); padding: 10px 12px; border-radius: 8px;
@@ -376,3 +491,166 @@ body {
 
 /* ─── GOOGLE MAPS OVERRIDES ─── */
 .gm-style-cc, .gmnoprint { display: none !important; }
+
+/* ─── ADDED UPGRADE STYLES (v3.1) ─── */
+
+.sb-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sb-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: var(--border-subtle);
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.lang-selector {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-raised);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.lang-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.lang-btn.active {
+  background: var(--color-primary);
+  color: #000;
+}
+
+.lang-btn:hover:not(.active) {
+  color: #fff;
+}
+
+/* Collapsible Sidebar Mechanics */
+#sidebar {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#sidebar.collapsed {
+  transform: translateX(-100%);
+  margin-right: calc(-1 * var(--sidebar-width));
+}
+
+#sidebar.collapsed * {
+  pointer-events: none;
+}
+
+.floating-uncollapse {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  --surface-base:        #F1F5F9;
+  --surface-raised:      #FFFFFF;
+  --surface-overlay:     rgba(241, 245, 249, 0.9);
+  --text-primary:        #0F172A;
+  --text-secondary:      #475569;
+  --text-tertiary:       #94A3B8;
+  --border-subtle:       rgba(15, 23, 42, 0.08);
+  --color-primary:       #EA580C; /* High-contrast saffron */
+  --color-primary-hover: #C2410C;
+  --shadow-md:           0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg:           0 10px 15px rgba(0, 0, 0, 0.08);
+  --glass-shadow:        0 8px 32px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+body.light-mode .sb-brand {
+  color: #0F172A;
+}
+
+body.light-mode .sb-brand i {
+  color: var(--color-primary);
+}
+
+body.light-mode .tab-btn:hover {
+  color: #0F172A;
+}
+
+body.light-mode .lang-btn:hover:not(.active) {
+  color: #0F172A;
+}
+
+body.light-mode .input-group input {
+  background: var(--surface-base);
+  color: #0F172A;
+}
+
+body.light-mode .route-title {
+  color: #0F172A;
+}
+
+body.light-mode .route-price {
+  color: #0F172A;
+}
+
+body.light-mode .tl-detail {
+  color: #0F172A;
+}
+
+body.light-mode .tl-walk-text {
+  color: #475569;
+}
+
+body.light-mode .store-info h4 {
+  color: #0F172A;
+}
+
+body.light-mode .coach-id {
+  color: #0F172A;
+}
+
+body.light-mode #toast {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+body.light-mode #toast h5 {
+  color: #0F172A;
+}
+

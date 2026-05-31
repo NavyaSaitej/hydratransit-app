@@ -12,52 +12,67 @@
         <!-- SIDEBAR -->
         <aside id="sidebar">
             <div class="sb-header">
-                <div class="sb-brand">
-                    <i class="fa-solid fa-route"></i> HydraTransit
+                <div class="sb-header-top">
+                    <div class="sb-brand" data-i18n="brand_name">
+                        <i class="fa-solid fa-route"></i> HydraTransit
+                    </div>
+                    <div class="sb-controls">
+                        <button id="theme-toggle-btn" class="ctrl-btn" onclick="toggleTheme()" title="Toggle Theme">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                        <button id="sidebar-collapse-btn" class="ctrl-btn" onclick="toggleSidebar()" title="Collapse Sidebar">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="lang-selector">
+                    <button class="lang-btn active" id="lang-en" onclick="setLanguage('en')">EN</button>
+                    <button class="lang-btn" id="lang-te" onclick="setLanguage('te')">తెలుగు</button>
+                    <button class="lang-btn" id="lang-hi" onclick="setLanguage('hi')">हिन्दी</button>
                 </div>
             </div>
             
             <div class="sb-tabs">
-                <button class="tab-btn active" onclick="switchTab('plan')"><i class="fa-solid fa-magnifying-glass"></i> Plan</button>
-                <button class="tab-btn" onclick="switchTab('pass')"><i class="fa-solid fa-ticket"></i> Pass</button>
-                <button class="tab-btn" onclick="switchTab('eco')"><i class="fa-solid fa-leaf"></i> Eco</button>
-                <button class="tab-btn" onclick="switchTab('ble')"><i class="fa-solid fa-satellite-dish"></i> Live</button>
+                <button class="tab-btn active" onclick="switchTab('plan')"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="tab_plan">Plan</span></button>
+                <button class="tab-btn" onclick="switchTab('pass')"><i class="fa-solid fa-ticket"></i> <span data-i18n="tab_pass">Pass</span></button>
+                <button class="tab-btn" onclick="switchTab('eco')"><i class="fa-solid fa-leaf"></i> <span data-i18n="tab_eco">Eco</span></button>
+                <button class="tab-btn" onclick="switchTab('ble')"><i class="fa-solid fa-satellite-dish"></i> <span data-i18n="tab_live">Live</span></button>
             </div>
 
             <!-- TAB: PLAN JOURNEY -->
             <div id="tab-plan" class="tab-content active">
                 <div class="search-box">
                     <div class="input-group">
-                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off">
+                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off" data-i18n-placeholder="placeholder_from">
                         <i class="fa-solid fa-location-dot"></i>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off">
+                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off" data-i18n-placeholder="placeholder_to">
                         <i class="fa-solid fa-flag-checkered"></i>
                     </div>
-                    <button class="search-btn" onclick="triggerSearch()">Find Best Routes</button>
+                    <button class="search-btn" onclick="triggerSearch()" id="find-btn" data-i18n="btn_find_routes">Find Best Routes</button>
                 </div>
                 <div id="routes-list" class="routes-container">
                     <!-- Route cards injected here -->
                     <div style="text-align:center; padding: 20px; color: var(--text-tertiary); font-size: 13px;">
                         <i class="fa-solid fa-map-location-dot" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i><br>
-                        Enter any address in Hyderabad to find multi-modal transit routes.
+                        <span data-i18n="plan_welcome">Enter any address in Hyderabad to find multi-modal transit routes.</span>
                     </div>
                 </div>
-                <button id="book-btn" class="search-btn" style="margin-top:20px;" onclick="purchasePass()" disabled>Get HydraPass for Selected</button>
+                <button id="book-btn" class="search-btn" style="margin-top:20px;" onclick="purchasePass()" disabled data-i18n="btn_get_pass">Get HydraPass for Selected</button>
             </div>
 
             <!-- TAB: HYDRAPASS -->
             <div id="tab-pass" class="tab-content">
-                <div class="section-title">Select Pass Type</div>
+                <div class="section-title" data-i18n="title_select_pass">Select Pass Type</div>
                 <div id="pass-type-grid" class="pass-type-grid"></div>
                 <div id="pass-invoice" class="pass-invoice">
-                    <div style="text-align:center;color:var(--text-tertiary);">Select a route first</div>
+                    <div style="text-align:center;color:var(--text-tertiary);" data-i18n="pass_select_route_first">Select a route first</div>
                 </div>
-                <div class="section-title">Your Active Pass</div>
+                <div class="section-title" data-i18n="title_active_pass">Your Active Pass</div>
                 <div id="ticket-card-area">
                     <div style="text-align:center; padding: 30px; background: var(--surface-raised); border-radius: 16px; border: 1px dashed var(--border-subtle); color: var(--text-tertiary); font-size: 12px;">
-                        No active passes.<br>Book a route to generate a HydraPass.
+                        <span data-i18n="pass_empty">No active passes.<br>Book a route to generate a HydraPass.</span>
                     </div>
                 </div>
             </div>
@@ -67,22 +82,38 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-val"><span id="user-pts">0</span> <i class="fa-solid fa-coins" style="font-size:14px; color:var(--color-primary)"></i></div>
-                        <div class="stat-label">Eco Points</div>
+                        <div class="stat-label" data-i18n="stat_eco_points">Eco Points</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val eco"><span id="user-co2">0.0</span> <span style="font-size:14px;">kg</span></div>
-                        <div class="stat-label">CO₂ Saved</div>
+                        <div class="stat-label" data-i18n="stat_co2_saved">CO₂ Saved</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val"><span id="streak-val">0</span> <i class="fa-solid fa-fire" style="font-size:14px; color:#F44336"></i></div>
-                        <div class="stat-label">Day Streak</div>
+                        <div class="stat-label" data-i18n="stat_streak">Day Streak</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-val" style="color:var(--text-primary);"><span id="daily-cap">0/20</span></div>
-                        <div class="stat-label">Daily Cap</div>
+                        <div class="stat-label" data-i18n="stat_daily_cap">Daily Cap</div>
                     </div>
                 </div>
-                <div class="section-title">Rewards Store</div>
+
+                <!-- STREAK MILESTONES -->
+                <div class="section-title" data-i18n="title_streak_milestones">Streak Milestones</div>
+                <div id="streak-milestones" class="streak-milestones"></div>
+
+                <!-- STREAK CALENDAR -->
+                <div class="section-title" data-i18n="title_streak_calendar">Streak Calendar (Last 14 Days)</div>
+                <div id="streak-calendar" class="streak-calendar"></div>
+
+                <!-- E-BIKE AVAILABILITY -->
+                <div class="section-title" data-i18n="title_ebikes">
+                    <i class="fa-solid fa-bicycle" style="margin-right:4px;"></i> Nearby E-Bikes
+                </div>
+                <div id="ebike-list" class="ebike-list"></div>
+
+                <!-- REWARDS STORE -->
+                <div class="section-title" data-i18n="title_store">Rewards Store</div>
                 <div id="store-list" class="store-list"></div>
             </div>
 
@@ -90,11 +121,11 @@
             <div id="tab-ble" class="tab-content">
                 <div style="background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 10px; font-size: 12px; color: #90CAF9;">
                     <i class="fa-solid fa-tower-broadcast" style="font-size: 16px; margin-top:2px;"></i>
-                    <div>Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.</div>
+                    <div data-i18n="ble_desc">Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                    <div class="section-title" style="margin:0;">Coach Density</div>
-                    <span id="ble-timer" style="font-size:10px; font-weight:700; color:var(--color-primary);">Scanning... 3s</span>
+                    <div class="section-title" style="margin:0;" data-i18n="title_coach_density">Coach Density</div>
+                    <span id="ble-timer" style="font-size:10px; font-weight:700; color:var(--color-primary);" data-i18n="ble_scanning">Scanning... 3s</span>
                 </div>
                 <div id="coach-list" class="coach-list"></div>
             </div>
@@ -102,6 +133,9 @@
 
         <!-- MAP CONTAINER -->
         <main id="map-container">
+            <button id="sidebar-uncollapse-btn" class="ctrl-btn floating-uncollapse" onclick="toggleSidebar()" title="Expand Sidebar" style="display: none;">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
             <div id="map"></div>
         </main>
     </div>

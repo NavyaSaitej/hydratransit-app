@@ -107,6 +107,29 @@ const ECO_MODEL = {
     ]
 };
 
+// ─── E-BIKE STATION DATABASE ─────────────────────────────────────────────
+const EBIKE_STATIONS = [
+    { station: 'Ameerpet Metro', provider: 'Bounce', lat: 17.4375, lng: 78.4482, icon: 'bounce' },
+    { station: 'HITEC City Metro', provider: 'Yulu', lat: 17.4504, lng: 78.3808, icon: 'yulu' },
+    { station: 'Raidurg Metro', provider: 'Bounce', lat: 17.4429, lng: 78.3773, icon: 'bounce' },
+    { station: 'Miyapur Metro', provider: 'Metro E-Bike', lat: 17.4964, lng: 78.3731, icon: 'metro' },
+    { station: 'Secunderabad Stn', provider: 'Yulu', lat: 17.4337, lng: 78.5016, icon: 'yulu' },
+    { station: 'Dilsukhnagar Metro', provider: 'Bounce', lat: 17.3690, lng: 78.5210, icon: 'bounce' },
+    { station: 'Kukatpally Metro', provider: 'Metro E-Bike', lat: 17.4851, lng: 78.4094, icon: 'metro' },
+    { station: 'Nagole Metro', provider: 'Yulu', lat: 17.3927, lng: 78.5572, icon: 'yulu' },
+    { station: 'Paradise Metro', provider: 'Bounce', lat: 17.4440, lng: 78.4860, icon: 'bounce' },
+    { station: 'Begumpet Metro', provider: 'Metro E-Bike', lat: 17.4410, lng: 78.4600, icon: 'metro' }
+];
+
+// ─── STREAK MILESTONES DEFINITION ────────────────────────────────────────
+const STREAK_MILESTONES = [
+    { days: 3, emoji: '🌱', label: { en: '3-Day', te: '3 రోజులు', hi: '3 दिन' }, bonus: '1.1x', color: '#66BB6A' },
+    { days: 5, emoji: '🌿', label: { en: '5-Day', te: '5 రోజులు', hi: '5 दिन' }, bonus: '1.3x', color: '#43A047' },
+    { days: 10, emoji: '🔥', label: { en: '10-Day', te: '10 రోజులు', hi: '10 दिन' }, bonus: '1.5x', color: '#E65100' },
+    { days: 21, emoji: '⚡', label: { en: '21-Day', te: '21 రోజులు', hi: '21 दिन' }, bonus: '2.0x', color: '#F9A825' },
+    { days: 30, emoji: '🏆', label: { en: '30-Day', te: '30 రోజులు', hi: '30 दिन' }, bonus: '2.5x', color: '#FF6F00' }
+];
+
 // ─── PASS TYPES ──────────────────────────────────────────────────────────
 const PASS_TYPES = [
     { id:'single', name:'Single Trip', price:'₹10-75', desc:'One journey', gradient:'linear-gradient(135deg,#667eea,#764ba2)', icon:'🎫' },
@@ -115,12 +138,172 @@ const PASS_TYPES = [
     { id:'monthly', name:'Monthly', price:'₹999', desc:'30 days unlimited', gradient:'linear-gradient(135deg,#43e97b,#38f9d7)', icon:'🗓️', best:true },
 ];
 
+// ─── GOOGLE MAPS LIGHT STYLE ────────────────────────────────────────────
+const LIGHT_MAP_STYLE = [
+    { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+    { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
+    { featureType: 'administrative.land_parcel', elementType: 'labels.text.fill', stylers: [{ color: '#bdbdbd' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+    { featureType: 'road.arterial', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#dadada' }] },
+    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+    { featureType: 'road.local', elementType: 'labels.text.fill', stylers: [{ color: '#9e9e9e' }] },
+    { featureType: 'transit.line', elementType: 'geometry', stylers: [{ color: '#e5e5e5' }] },
+    { featureType: 'transit.station', elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9c9c9' }] },
+    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#9e9e9e' }] }
+];
+
+// ─── TRANSLATION DICTIONARIES ────────────────────────────────────────────
+const TRANSLATIONS = {
+    en: {
+        brand_name: '<i class="fa-solid fa-route"></i> HydraTransit',
+        tab_plan: "Plan",
+        tab_pass: "Pass",
+        tab_eco: "Eco",
+        tab_live: "Live",
+        placeholder_from: "Where from?",
+        placeholder_to: "Where to?",
+        btn_find_routes: "Find Best Routes",
+        plan_welcome: "Enter any address in Hyderabad to find multi-modal transit routes.",
+        btn_get_pass: "Get HydraPass for Selected",
+        title_select_pass: "Select Pass Type",
+        pass_select_route_first: "Select a route first",
+        title_active_pass: "Your Active Pass",
+        pass_empty: "No active passes.<br>Book a route to generate a HydraPass.",
+        stat_eco_points: "Eco Points",
+        stat_co2_saved: "CO₂ Saved",
+        stat_streak: "Day Streak",
+        stat_daily_cap: "Daily Cap",
+        title_store: "Rewards Store",
+        title_streak_milestones: "Streak Milestones",
+        title_streak_calendar: "Streak Calendar (Last 14 Days)",
+        title_ebikes: '<i class="fa-solid fa-bicycle" style="margin-right:4px;"></i> Nearby E-Bikes',
+        ebike_available: "available",
+        ble_desc: "Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.",
+        title_coach_density: "Coach Density",
+        ble_scanning: "Scanning... 3s"
+    },
+    te: {
+        brand_name: '<i class="fa-solid fa-route"></i> హైడ్రాట్రాన్సిట్',
+        tab_plan: "ప్రణాళిక",
+        tab_pass: "పాస్",
+        tab_eco: "ఎకో",
+        tab_live: "లైవ్",
+        placeholder_from: "ఎక్కడి నుండి?",
+        placeholder_to: "ఎక్కడికి?",
+        btn_find_routes: "మార్గాలను కనుగొనండి",
+        plan_welcome: "మల్టీ-మోడల్ రవాణా మార్గాలను కనుగొనడానికి హైదరాబాద్‌లో ఏదైనా చిరునామాను నమోదు చేయండి.",
+        btn_get_pass: "ఎంచుకున్న రూట్ కోసం హైడ్రాపాస్ పొందండి",
+        title_select_pass: "పాస్ రకాన్ని ఎంచుకోండి",
+        pass_select_route_first: "ముందుగా ఒక మార్గాన్ని ఎంచుకోండి",
+        title_active_pass: "మీ యాక్టివ్ పాస్",
+        pass_empty: "యాక్టిവ് పాస్‌లు లేవు.<br>హైడ్రాపాస్‌ని జనరేట్ చేయడానికి ప్రయాణ మార్గాన్ని బుక్ చేయండి.",
+        stat_eco_points: "ఎకో పాయింట్లు",
+        stat_co2_saved: "ఆదా చేసిన CO₂",
+        stat_streak: "డే స్ట్రీక్",
+        stat_daily_cap: "రోజువారీ పరిమితి",
+        title_store: "రివార్డ్స్ స్టోర్",
+        title_streak_milestones: "స్ట్రీక్ మైలురాళ్ళు",
+        title_streak_calendar: "స్ట్రీక్ క్యాలెండర్ (గత 14 రోజులు)",
+        title_ebikes: '<i class="fa-solid fa-bicycle" style="margin-right:4px;"></i> సమీపంలోని ఇ-బైక్‌లు',
+        ebike_available: "అందుబాటులో",
+        ble_desc: "తదుపరి మెట్రో రైలు కోచ్ క్రౌడింగ్‌ను అంచనా వేయడానికి బ్లూటూత్ బీకాన్ స్కాన్‌లను అనుకరించడం.",
+        title_coach_density: "కోచ్ సాంద్రత",
+        ble_scanning: "స్కాన్ చేస్తోంది... 3సె"
+    },
+    hi: {
+        brand_name: '<i class="fa-solid fa-route"></i> हाइड्राट्रांजिट',
+        tab_plan: "यात्रा योजना",
+        tab_pass: "पास",
+        tab_eco: "इको",
+        tab_live: "लाइव",
+        placeholder_from: "कहाँ से?",
+        placeholder_to: "कहाँ तक?",
+        btn_find_routes: "सर्वोत्तम मार्ग खोजें",
+        plan_welcome: "मल्टी-मोडल पारगमन मार्ग खोजने के लिए हैदराबाद में कोई भी पता दर्ज करें।",
+        btn_get_pass: "चयनित मार्ग के लिए हाइड्रापास प्राप्त करें",
+        title_select_pass: "पास प्रकार चुनें",
+        pass_select_route_first: "पहले एक मार्ग चुनें",
+        title_active_pass: "आपका सक्रिय पास",
+        pass_empty: "कोई सक्रिय पास नहीं है।<br>हाइड्रापास उत्पन्न करने के लिए एक मार्ग बुक करें।",
+        stat_eco_points: "इको पॉइंट्स",
+        stat_co2_saved: "CO₂ की बचत",
+        stat_streak: "डे स्ट्रीक",
+        stat_daily_cap: "दैनिक सीमा",
+        title_store: "रिवॉर्ड्स स्टोर",
+        title_streak_milestones: "स्ट्रीक माइलस्टोन",
+        title_streak_calendar: "स्ट्रीक कैलेंडर (पिछले 14 दिन)",
+        title_ebikes: '<i class="fa-solid fa-bicycle" style="margin-right:4px;"></i> निकटतम ई-बाइक',
+        ebike_available: "उपलब्ध",
+        ble_desc: "अगली मेट्रो ट्रेन के लिए डिब्बे की भीड़ का अनुमान लगाने के लिए ब्लूटूथ बीकन स्कैन का अनुकरण करना।",
+        title_coach_density: "डिब्बे का घनत्व",
+        ble_scanning: "स्कैनिंग... 3सेक"
+    }
+};
+
+const PASS_TYPES_LOCALIZED = {
+    en: {
+        single: { name: 'Single Trip', desc: 'One journey' },
+        day: { name: 'Day Pass', desc: 'Unlimited 24hrs' },
+        weekly: { name: 'Weekly Pass', desc: '7 days unlimited' },
+        monthly: { name: 'Monthly Pass', desc: '30 days unlimited' }
+    },
+    te: {
+        single: { name: 'సింగిల్ ట్రిప్', desc: 'ఒక్క ప్రయాణం' },
+        day: { name: 'డే పాస్', desc: 'అపరిమిత 24 గంటలు' },
+        weekly: { name: 'వీక్లీ పాస్', desc: '7 రోజులు అపరిమితం' },
+        monthly: { name: 'మంత్లీ పాస్', desc: '30 రోజులు అపరిమితం' }
+    },
+    hi: {
+        single: { name: 'सिंगल ट्रिप', desc: 'एकल यात्रा' },
+        day: { name: 'डे पास', desc: 'असीमित २४ घंटे' },
+        weekly: { name: 'साप्ताहिक पास', desc: '७ दिन असीमित' },
+        monthly: { name: 'मासिक पास', desc: '३० दिन असीमित' }
+    }
+};
+
+const CATALOG_LOCALIZED = {
+    en: {
+        "☕ Chai Point": "₹20 off Chai",
+        "🫖 Niloufer Cafe": "Free Irani Chai",
+        "🍪 Karachi Bakery": "₹75 Biscuit Box",
+        "🚇 HMRL Metro": "₹30 Fare Credit",
+        "🚌 TSRTC": "Day Pass Voucher",
+        "🍱 Swiggy": "₹50 Food Credit",
+        "🎬 BookMyShow": "₹150 Movie Voucher"
+    },
+    te: {
+        "☕ Chai Point": "₹20 చాయ్ తగ్గింపు",
+        "🫖 Niloufer Cafe": "ఉచిత ఇరానీ చాయ్",
+        "🍪 Karachi Bakery": "₹75 బిస్కెట్ బాక్స్",
+        "🚇 HMRL Metro": "₹30 మెట్రో క్రెడిట్",
+        "🚌 TSRTC": "ఉచిత బస్సు పాస్",
+        "🍱 Swiggy": "₹50 ఫుడ్ క్రెడిట్",
+        "🎬 BookMyShow": "₹150 సినిమా వోచర్"
+    },
+    hi: {
+        "☕ Chai Point": "₹20 चाय छूट",
+        "🫖 Niloufer Cafe": "मुफ़्त ईरानी चाय",
+        "🍪 Karachi Bakery": "₹75 बिस्कुट बॉक्स",
+        "🚇 HMRL Metro": "₹30 मेट्रो क्रेडिट",
+        "🚌 TSRTC": "मुफ़्त बस पास",
+        "🍱 Swiggy": "₹50 भोजन क्रेडिट",
+        "🎬 BookMyShow": "₹150 फिल्म वाउचर"
+    }
+};
+
 // ─── APP STATE ───────────────────────────────────────────────────────────
 let map, directionsService, originAutocomplete, destAutocomplete;
 let originPlace = null, destPlace = null;
 let activePolylines = [], activeMarkers = [];
 let currentRoutes = [], selectedRouteIdx = -1;
 let selectedPassType = 'single';
+let currentLanguage = localStorage.getItem('ht_lang') || 'en';
+let currentTheme = localStorage.getItem('ht_theme') || 'dark';
 
 let wallet = {
     points: parseInt(localStorage.getItem('ht_pts')) || 0,
@@ -133,10 +316,13 @@ let wallet = {
 
 // ─── GOOGLE MAPS INIT (called by API callback) ──────────────────────────
 function initMap() {
+    const savedTheme = localStorage.getItem('ht_theme') || 'dark';
+    const savedLang = localStorage.getItem('ht_lang') || 'en';
+
     map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: 17.4100, lng: 78.4500 },
         zoom: 12,
-        styles: DARK_MAP_STYLE,
+        styles: savedTheme === 'dark' ? DARK_MAP_STYLE : LIGHT_MAP_STYLE,
         disableDefaultUI: true,
         zoomControl: true,
         zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
@@ -148,13 +334,24 @@ function initMap() {
     drawNetworkLines();
     setupAutocomplete();
     initBLE();
-    renderStore();
-    renderPassTypes();
+    
+    // Apply theme settings on init
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        if (themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    }
+
+    setLanguage(savedLang);
     updateWalletUI();
     resetDailyCaps();
+    renderStreakMilestones();
+    renderStreakCalendar();
+    renderEbikes();
 
     showToast('HydraTransit Ready', 'Google Maps loaded — search any address in Hyderabad.');
 }
+
 
 // ─── NETWORK POLYLINES ON MAP ─────────────────────────────────────────
 function drawNetworkLines() {
@@ -630,7 +827,7 @@ function renderTimeline(segments) {
         const dotClass = s.type === 'walk' ? 'walk' : s.type === 'cab' ? 'walk' : s.type;
         const isLast = i === segments.length - 1;
         let detail = '';
-        if (s.type !== 'walk' && s.type !== 'cab') {
+        if (s.type !== 'walk' && s.type !== 'cab' && s.from) {
             const isLive = s.depTime && s.depTime.includes('Live');
             const liveBadge = isLive ? `<span class="live-dot pulse" style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-right:4px;animation:pulse 1.5s infinite;"></span>` : '';
             detail = `<div class="tl-transit-info">
@@ -739,18 +936,20 @@ function updatePassForRoute(route) {
 function renderPassTypes() {
     const c = document.getElementById('pass-type-grid');
     if (!c) return;
-    c.innerHTML = PASS_TYPES.map(p => `
+    c.innerHTML = PASS_TYPES.map(p => {
+        const loc = PASS_TYPES_LOCALIZED[currentLanguage][p.id] || { name: p.name, desc: p.desc };
+        return `
         <div class="pass-option ${p.id === selectedPassType ? 'selected' : ''}" onclick="selectPass('${p.id}')">
-            ${p.popular ? '<div class="pass-tag popular">Popular</div>' : ''}
-            ${p.best ? '<div class="pass-tag best">Best Value</div>' : ''}
+            ${p.popular ? `<div class="pass-tag popular">${currentLanguage === 'te' ? 'పాపులర్' : currentLanguage === 'hi' ? 'लोकप्रिय' : 'Popular'}</div>` : ''}
+            ${p.best ? `<div class="pass-tag best">${currentLanguage === 'te' ? 'ఉత్తమ విలువ' : currentLanguage === 'hi' ? 'सर्वोत्तम' : 'Best Value'}</div>` : ''}
             <div class="pass-card-mini" style="background:${p.gradient}">
                 <span class="pass-icon">${p.icon}</span>
-                <span class="pass-name">${p.name}</span>
+                <span class="pass-name">${loc.name}</span>
                 <span class="pass-price">${p.price}</span>
             </div>
-            <span class="pass-desc">${p.desc}</span>
+            <span class="pass-desc">${loc.desc}</span>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function selectPass(id) {
@@ -943,12 +1142,15 @@ async function scanBLE() {
 function renderStore() {
     const c = document.getElementById('store-list');
     if (!c) return;
-    c.innerHTML = ECO_MODEL.catalog.map(it => `
+    c.innerHTML = ECO_MODEL.catalog.map(it => {
+        const key = `${it.icon} ${it.brand}`;
+        const itemDesc = CATALOG_LOCALIZED[currentLanguage][key] || it.item;
+        return `
         <div class="store-item">
-            <div class="store-info"><h4>${it.icon} ${it.brand}</h4><p>${it.item}</p></div>
+            <div class="store-info"><h4>${it.icon} ${it.brand}</h4><p>${itemDesc}</p></div>
             <div class="store-cost" onclick="redeem('${it.brand}',${it.cost})">${it.cost} PTS</div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function updateWalletUI() {
@@ -960,6 +1162,8 @@ function updateWalletUI() {
     if (c) c.textContent = wallet.co2.toFixed(1);
     if (d) d.textContent = `${wallet.ptsToday}/${ECO_MODEL.caps.daily}`;
     if (s) s.textContent = wallet.streak;
+    renderStreakMilestones();
+    renderStreakCalendar();
 }
 
 function redeem(brand, cost) {
@@ -1299,4 +1503,172 @@ async function generateAllSyntheticRoutes(o, d) {
         buildTrueMultiModal(o, d, 1)
     ]);
     return routes.filter(r => r !== null);
+}
+
+// ─── LANGUAGE SWITCHER ───────────────────────────────────────────────────
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('ht_lang', lang);
+    
+    // Toggle active classes on buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`lang-${lang}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    // Translate all static nodes
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+            el.innerHTML = TRANSLATIONS[lang][key];
+        }
+    });
+
+    // Translate all input placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+            el.setAttribute('placeholder', TRANSLATIONS[lang][key]);
+        }
+    });
+
+    // Refresh dynamic stores, pass types, and active pass
+    renderStore();
+    renderPassTypes();
+    renderEbikes();
+    renderStreakMilestones();
+    if (selectedRouteIdx !== -1) {
+        updatePassForRoute(currentRoutes[selectedRouteIdx]);
+    }
+}
+
+// ─── DYNAMIC THEME ENGINE ────────────────────────────────────────────────
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('theme-toggle-btn');
+    
+    if (body.classList.contains('light-mode')) {
+        body.classList.remove('light-mode');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        localStorage.setItem('ht_theme', 'dark');
+        if (map) map.setOptions({ styles: DARK_MAP_STYLE });
+        showToast('Dark Mode Active', 'Switched to high-tech slate map style.');
+    } else {
+        body.classList.add('light-mode');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        localStorage.setItem('ht_theme', 'light');
+        if (map) map.setOptions({ styles: LIGHT_MAP_STYLE });
+        showToast('Light Mode Active', 'Switched to clean light high-contrast map style.');
+    }
+}
+
+// ─── COLLAPSIBLE SIDEBAR MECHANICS ───────────────────────────────────────
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const uncollapseBtn = document.getElementById('sidebar-uncollapse-btn');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        sidebar.classList.remove('collapsed');
+        if (uncollapseBtn) uncollapseBtn.style.display = 'none';
+        showToast('Sidebar Expanded', 'Control panel restored.');
+    } else {
+        sidebar.classList.add('collapsed');
+        if (uncollapseBtn) uncollapseBtn.style.display = 'flex';
+        showToast('Sidebar Collapsed', 'Maps view maximized. Click floating arrow to expand.');
+    }
+    
+    // Trigger map resize event for Google Maps
+    if (google && google.maps && map) {
+        google.maps.event.trigger(map, 'resize');
+    }
+}
+
+// ─── ECO STREAKS: MILESTONE BADGES ───────────────────────────────────────
+function renderStreakMilestones() {
+    const container = document.getElementById('streak-milestones');
+    if (!container) return;
+    const streak = wallet.streak;
+
+    container.innerHTML = STREAK_MILESTONES.map(ms => {
+        const achieved = streak >= ms.days;
+        const isCurrent = !achieved && streak < ms.days &&
+            (ms === STREAK_MILESTONES[0] || streak >= STREAK_MILESTONES[STREAK_MILESTONES.indexOf(ms) - 1]?.days);
+        const progress = achieved ? 100 : Math.min(100, Math.round((streak / ms.days) * 100));
+        const label = ms.label[currentLanguage] || ms.label.en;
+
+        return `<div class="milestone-card ${achieved ? 'achieved' : ''} ${isCurrent ? 'current' : ''}">
+            <div class="ms-ring" style="--ms-color:${ms.color}; --ms-progress:${progress}%;">
+                <div class="ms-ring-inner">${achieved ? '✓' : ms.emoji}</div>
+            </div>
+            <div class="ms-label">${label}</div>
+            <div class="ms-bonus">${ms.bonus} pts</div>
+        </div>`;
+    }).join('');
+}
+
+// ─── ECO STREAKS: 14-DAY CALENDAR HEATMAP ────────────────────────────────
+function renderStreakCalendar() {
+    const container = document.getElementById('streak-calendar');
+    if (!container) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const streak = wallet.streak;
+    const dayNames = ['S','M','T','W','T','F','S'];
+    let html = '';
+
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const isToday = i === 0;
+        const isFuture = false;
+        // Days within the streak are considered active
+        const isActive = i < streak;
+        const dayNum = d.getDate();
+        const dayLabel = dayNames[d.getDay()];
+
+        html += `<div class="streak-day ${isActive ? 'active' : ''} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''}">
+            ${isActive && isToday ? '<span class="streak-fire">🔥</span>' : ''}
+            <span class="day-num">${dayNum}</span>
+            <span class="day-label">${dayLabel}</span>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+// ─── E-BIKE AVAILABILITY RENDERER ────────────────────────────────────────
+function renderEbikes() {
+    const container = document.getElementById('ebike-list');
+    if (!container) return;
+    const availLabel = (TRANSLATIONS[currentLanguage] && TRANSLATIONS[currentLanguage].ebike_available) || 'available';
+
+    // Generate simulated live data for each station
+    container.innerHTML = EBIKE_STATIONS.map(station => {
+        // Seed-based deterministic random so values are stable per page load
+        const seed = station.station.length + station.lat * 100;
+        const avail = Math.floor(((Math.sin(seed) + 1) / 2) * 12) + 1;
+        const totalDocks = avail + Math.floor(((Math.cos(seed) + 1) / 2) * 6) + 2;
+        const battery = Math.floor(((Math.sin(seed * 3.7) + 1) / 2) * 70) + 20;
+        const batClass = battery >= 60 ? 'high' : battery >= 30 ? 'mid' : 'low';
+        const availClass = avail >= 5 ? 'high' : avail >= 2 ? 'mid' : 'low';
+
+        return `<div class="ebike-card">
+            <div class="ebike-icon ${station.icon}">
+                ${station.icon === 'bounce' ? '🛵' : station.icon === 'yulu' ? '🚲' : '⚡'}
+            </div>
+            <div class="ebike-details">
+                <div class="ebike-station">${station.station}</div>
+                <div class="ebike-provider">${station.provider} · ${(station.lat * 78).toFixed(0)}m away</div>
+                <div class="ebike-meta">
+                    <span class="ebike-avail ${availClass}">${avail}/${totalDocks} ${availLabel}</span>
+                    <span class="ebike-battery">
+                        <span class="battery-gauge">
+                            <span class="battery-fill ${batClass}" style="width:${battery}%"></span>
+                        </span>
+                        ${battery}%
+                    </span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
 }
