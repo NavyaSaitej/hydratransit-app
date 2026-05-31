@@ -91,6 +91,7 @@ Production deployment: https://hydratransit-app.vercel.app
 |-- HydraTransit_Hackathon_Pitch.pptx
 |-- AGENT.md                  # AI agent handoff and continuation guide
 |-- CONTRIBUTING.md           # Open source contributor guide
+|-- USER_MANUAL.md            # End-user guide for app features and workflows
 |-- .gitignore                # Git ignore rules
 |-- .gitlab-ci.yml            # GitLab CI/CD pipeline configuration
 `-- README.md                 # Project documentation
