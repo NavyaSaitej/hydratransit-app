@@ -89,6 +89,8 @@ Production deployment: https://hydratransit-app.vercel.app
 |-- style.css                 # Global styles (glassmorphism, animations, responsive)
 |-- state_checkpoint.json     # System parameters, landmark datasets, task checklists
 |-- HydraTransit_Hackathon_Pitch.pptx
+|-- AGENT.md                  # AI agent handoff and continuation guide
+|-- CONTRIBUTING.md           # Open source contributor guide
 |-- .gitignore                # Git ignore rules
 |-- .gitlab-ci.yml            # GitLab CI/CD pipeline configuration
 `-- README.md                 # Project documentation
