@@ -8,9 +8,9 @@ Website Link:- https://hydratransit-app.vercel.app
 
 **Multi-Modal Route Planner:** Compiles hybrid journeys such as Bus -> Metro -> E-Bike, calculating total duration, cost, and exact carbon savings dynamically.
 
-**Interactive GIS Network Mapping:**
+**Interactive Google Maps Network Mapping:**
 
-- Renders active transit layers over a futuristic dark Hyderabad coordinate grid using Leaflet.js and CartoDB Dark Matter.
+- Renders active transit layers over a futuristic dark Hyderabad coordinate grid using Google Maps.
 - Plots Red, Blue, and Green Metro lines alongside animated TSRTC vehicle trackers.
 
 **Bluetooth BLE Coach Radar:** Simulates live Bluetooth beacon scanning inside Metro carriages to track coach crowding levels (Low, Mid, High), directing passengers to open carriages.
@@ -34,7 +34,7 @@ Website Link:- https://hydratransit-app.vercel.app
 
 **JavaScript (Vanilla):** Core application logic, routing engine, and interactivity.
 
-**Leaflet.js:** Interactive GIS mapping with CartoDB Dark Matter tiles.
+**Google Maps JavaScript API:** Interactive mapping, Places Autocomplete, Directions, and Geocoding.
 
 **HTML5 Canvas:** QR code generation for the unified Hydra-Pass.
 
@@ -80,6 +80,18 @@ No build step is required. The project is a static web application. Deploy the p
 
 Production deployment: https://hydratransit-app.vercel.app
 
+## Demo Scope
+
+The following features are simulations for demo purposes and are not connected to live fare or fleet systems:
+
+- **HydraPass QR codes:** Visually generated with HTML5 Canvas, not real fare-system tickets.
+- **BLE Coach Radar:** Simulated crowding data. Real Bluetooth is attempted only when supported and permitted, then falls back automatically.
+- **TSRTC arrival times:** Estimated demo values, not live GTFS or agency data.
+- **E-bike availability:** Static simulated availability, not connected to Bounce, Yulu, or other live APIs.
+- **Eco rewards:** Demo vouchers and points, not real commercial redemptions.
+
+Route calculations use Google Maps services and local transit datasets to provide realistic demo journeys.
+
 ## Project Structure
 
 ```text
@@ -92,6 +104,7 @@ Production deployment: https://hydratransit-app.vercel.app
 |-- AGENT.md                  # AI agent handoff and continuation guide
 |-- CONTRIBUTING.md           # Open source contributor guide
 |-- USER_MANUAL.md            # End-user guide for app features and workflows
+|-- STRESS_TEST_CHECKPOINT.md # Current stress-test remediation checkpoint
 |-- .gitignore                # Git ignore rules
 |-- .gitlab-ci.yml            # GitLab CI/CD pipeline configuration
 `-- README.md                 # Project documentation

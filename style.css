@@ -654,3 +654,12 @@ body.light-mode #toast h5 {
   color: #0F172A;
 }
 
+.route-cap-note {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.9;
+}

@@ -1,7 +1,7 @@
 {
   "project_name": "HydraTransit",
   "version": "3.0.0",
-  "status": "Awaiting User Demo",
+  "status": "Stress-test remediation in progress",
   "theme": "CivicTech - Hyderabad Transit",
   "key_features_implemented": [
     "Google Maps Integration (Maps JS, Places Autocomplete, Directions API)",
@@ -20,7 +20,9 @@
     "Google Fonts (Inter, JetBrains Mono)"
   ],
   "next_steps": [
-    "User testing and review of the v3 premium UI",
-    "Prepare for Hackathon demo pitch"
+    "Run local rendered smoke test after stress-test fixes",
+    "Push verified fixes to Swecha and GitHub",
+    "Deploy verified fixes to Vercel",
+    "Restrict Google Maps API key by HTTP referrer in Google Cloud Console"
   ]
 }

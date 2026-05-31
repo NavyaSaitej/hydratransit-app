@@ -45,7 +45,7 @@ const METRO_STATIONS = {
 // ─── MMTS STATION DATABASE ───────────────────────────────────────────────
 const MMTS_STATIONS = {
     "Lingampally":{lat:17.4836,lng:78.3158,line:"mmts_hl",idx:0},"Chandanagar":{lat:17.4934,lng:78.3309,line:"mmts_hl",idx:1},
-    "Hafeezpet":{lat:17.4883,lng:78.3541,line:"mmts_hl",idx:2},"Hitec City MMTS":{lat:17.4727,lng:78.3783,line:"mmts_hl",idx:3},
+    "Hafeezpet":{lat:17.4883,lng:78.3541,line:"mmts_hl",idx:2},
     "Borabanda":{lat:17.4646,lng:78.3970,line:"mmts_hl",idx:4},"Bharat Nagar MMTS":{lat:17.4623,lng:78.4239,line:"mmts_hl",idx:5},
     "Sanathnagar":{lat:17.4589,lng:78.4357,line:"mmts_hl",idx:6},"Fatehnagar":{lat:17.4552,lng:78.4452,line:"mmts_hl",idx:7},
     "Nature Cure":{lat:17.4526,lng:78.4523,line:"mmts_hl",idx:8},"Begumpet MMTS":{lat:17.4474,lng:78.4619,line:"mmts_hl",idx:9},
@@ -304,15 +304,12 @@ let currentRoutes = [], selectedRouteIdx = -1;
 let selectedPassType = 'single';
 let currentLanguage = localStorage.getItem('ht_lang') || 'en';
 let currentTheme = localStorage.getItem('ht_theme') || 'dark';
+let bookingInProgress = false;
+let quotaToastShown = false;
+let walletIntegrityWarning = false;
+const BLE_SCAN_SEED = Math.floor(Date.now() / 600000);
 
-let wallet = {
-    points: parseInt(localStorage.getItem('ht_pts')) || 0,
-    co2: parseFloat(localStorage.getItem('ht_co2')) || 0,
-    ptsToday: parseInt(localStorage.getItem('ht_ptsd')) || 0,
-    lastTrip: parseInt(localStorage.getItem('ht_lt')) || 0,
-    streak: parseInt(localStorage.getItem('ht_str')) || 0,
-    trips: JSON.parse(localStorage.getItem('ht_trips') || '[]')
-};
+let wallet = loadWallet();
 
 // ─── GOOGLE MAPS INIT (called by API callback) ──────────────────────────
 function initMap() {
@@ -348,6 +345,12 @@ function initMap() {
     renderStreakMilestones();
     renderStreakCalendar();
     renderEbikes();
+    if (document.getElementById('sidebar')?.classList.contains('collapsed')) {
+        google.maps.event.trigger(map, 'resize');
+    }
+    if (walletIntegrityWarning) {
+        showToast('Wallet Reset', 'Stored wallet data failed its integrity check.');
+    }
 
     showToast('HydraTransit Ready', 'Google Maps loaded — search any address in Hyderabad.');
 }
@@ -441,15 +444,42 @@ function setupAutocomplete() {
 }
 
 // ─── TAB SWITCHING ───────────────────────────────────────────────────────
-function switchTab(tabId) {
+function switchTab(tabId, triggerBtn = null) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    document.getElementById(`tab-${tabId}`).classList.add('active');
+    const btn = triggerBtn || document.querySelector(`.tab-btn[onclick*="'${tabId}'"]`);
+    if (btn) btn.classList.add('active');
+    const panel = document.getElementById(`tab-${tabId}`);
+    if (panel) panel.classList.add('active');
     if (tabId === 'ble') scanBLE();
 }
 
 // ─── ROUTE SEARCH ────────────────────────────────────────────────────────
+function notifyQuotaLimit() {
+    if (quotaToastShown) return;
+    quotaToastShown = true;
+    showToast('API Limit Reached', 'Maps quota is limited. Showing simulated route fallbacks where needed.');
+}
+
+function requestDirections(options, timeoutMs = 7000) {
+    return new Promise(resolve => {
+        let settled = false;
+        const timer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            resolve({ res: null, status: 'TIMEOUT' });
+        }, timeoutMs);
+
+        directionsService.route(options, (res, status) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            if (status === 'OVER_QUERY_LIMIT') notifyQuotaLimit();
+            resolve({ res, status });
+        });
+    });
+}
+
 async function triggerSearch() {
     const originVal = document.getElementById('origin-input').value;
     const destVal = document.getElementById('dest-input').value;
@@ -486,6 +516,7 @@ async function triggerSearch() {
             return;
         }
     }
+    renderEbikes();
 
     // Show loading skeleton
     const container = document.getElementById('routes-list');
@@ -508,40 +539,51 @@ async function triggerSearch() {
     currentRoutes = [];
     selectedRouteIdx = -1;
 
-    // Parallel requests for Transit and Driving
-    const pTransit = new Promise((resolve) => {
-        directionsService.route({
-            origin: o, destination: d,
-            travelMode: google.maps.TravelMode.TRANSIT,
-            transitOptions: { modes: ['SUBWAY','BUS','TRAIN','RAIL'] },
-            provideRouteAlternatives: true
-        }, (res, status) => resolve({res, status}));
-    });
+    const pTransit = requestDirections({
+        origin: o, destination: d,
+        travelMode: google.maps.TravelMode.TRANSIT,
+        transitOptions: { modes: ['SUBWAY','BUS','TRAIN','RAIL'] },
+        provideRouteAlternatives: true
+    }, 8000);
 
-    const pDriving = new Promise((resolve) => {
-        directionsService.route({
-            origin: o, destination: d,
-            travelMode: google.maps.TravelMode.DRIVING
-        }, (res, status) => resolve({res, status}));
-    });
+    const pDriving = requestDirections({
+        origin: o, destination: d,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, 8000);
 
-    Promise.all([pTransit, pDriving]).then(async ([transit, driving]) => {
+    try {
+        const [transit, driving] = await Promise.all([pTransit, pDriving]);
         currentRoutes = [];
 
-        // Parse transit routes
         if (transit.status === 'OK') {
             transit.res.routes.forEach((route, i) => {
                 currentRoutes.push(parseTransitRoute(route, i));
             });
+        } else if (transit.status === 'OVER_QUERY_LIMIT') {
+            notifyQuotaLimit();
         }
-        
-        // Always add our robust custom fallback routes (because Google often ignores MMTS entirely)
-        const syntheticRoutes = await generateAllSyntheticRoutes(o, d);
-        syntheticRoutes.forEach(r => currentRoutes.push(r));
 
-        // Parse driving route
         if (driving.status === 'OK') {
             currentRoutes.push(parseDrivingRoute(driving.res.routes[0]));
+        } else if (driving.status === 'OVER_QUERY_LIMIT') {
+            notifyQuotaLimit();
+        }
+
+        if (currentRoutes.length > 0) {
+            processAndSortRoutes();
+            renderRouteCards();
+            selectRoute(0);
+            showToast('Routes Found', 'Showing Google routes while simulated options load.');
+        } else {
+            container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-route"></i><p>Building simulated transit routes...</p></div>';
+        }
+
+        try {
+            const syntheticRoutes = await generateAllSyntheticRoutes(o, d);
+            syntheticRoutes.forEach(r => currentRoutes.push(r));
+        } catch (e) {
+            console.warn('Synthetic routes failed:', e);
+            showToast('Simulated Routes Limited', 'Some backup routes could not be generated.');
         }
 
         if (currentRoutes.length === 0) {
@@ -555,10 +597,10 @@ async function triggerSearch() {
         renderRouteCards();
         selectRoute(0);
         showToast('Routes Found', 'Displaying fastest and eco-friendly options.');
-    }).catch(e => {
+    } catch(e) {
         console.error(e);
         container.innerHTML = `<div class="empty-state" style="text-align:left; color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i><p>Error calculating routes:</p><pre style="font-size:10px; white-space:pre-wrap;">${e.stack || e.message || e}</pre></div>`;
-    });
+    }
 }
 
 function processAndSortRoutes() {
@@ -674,7 +716,8 @@ function parseTransitRoute(route, idx) {
     const co2Transit = totalTransitKm * ECO_MODEL.co2.metro;
     const co2Saved = Math.max(0, co2Car - co2Transit);
     const isMultiModal = segments.filter(s => s.type !== 'walk').length >= 2;
-    const pts = calcPoints(totalTransitKm, isMultiModal);
+    const pointDetails = calcPointDetails(totalTransitKm, isMultiModal);
+    const pts = pointDetails.capped;
 
     return {
         type: 'transit', idx,
@@ -686,6 +729,8 @@ function parseTransitRoute(route, idx) {
         segments, polylinePaths,
         co2Saved: co2Saved.toFixed(2),
         points: pts,
+        rawPoints: pointDetails.raw,
+        pointCapReached: pointDetails.capReached,
         recommended: false, // Set in processAndSortRoutes
         fastest: false,
         depTime: leg.departure_time.text,
@@ -768,12 +813,20 @@ function calcCO2Saved(totalDist, segments) {
 }
 
 function calcRoutePoints(segments, isMultiModal) {
+    return calcRoutePointDetails(segments, isMultiModal).capped;
+}
+
+function calcRoutePointDetails(segments, isMultiModal) {
     let greenDist = 0;
     segments.forEach(s => { if (s.type !== 'cab') greenDist += s.dist; });
-    return calcPoints(greenDist, isMultiModal);
+    return calcPointDetails(greenDist, isMultiModal);
 }
 
 function calcPoints(distKm, isMultiModal) {
+    return calcPointDetails(distKm, isMultiModal).capped;
+}
+
+function calcPointDetails(distKm, isMultiModal) {
     let pts = distKm * ECO_MODEL.earn.basePerKm;
     if (isMultiModal) pts *= ECO_MODEL.earn.multiModal;
     const hr = new Date().getHours();
@@ -782,7 +835,9 @@ function calcPoints(distKm, isMultiModal) {
     if (s >= 10) pts *= ECO_MODEL.earn.streak[10];
     else if (s >= 5) pts *= ECO_MODEL.earn.streak[5];
     else if (s >= 3) pts *= ECO_MODEL.earn.streak[3];
-    return Math.min(Math.round(pts), ECO_MODEL.caps.perTrip);
+    const raw = Math.round(pts);
+    const capped = Math.min(raw, ECO_MODEL.caps.perTrip);
+    return { raw, capped, capReached: raw > capped };
 }
 
 // ─── RENDER ROUTE CARDS ──────────────────────────────────────────────────
@@ -817,6 +872,7 @@ function renderRouteCards() {
                 <span><i class="fa-solid fa-road"></i> ${r.distance}</span>
                 ${parseFloat(r.co2Saved) > 0 ? `<span class="eco-chip"><i class="fa-solid fa-leaf"></i> -${r.co2Saved}kg CO₂ <span class="pts-chip">+${r.points}pts</span></span>` : '<span class="no-eco"><i class="fa-solid fa-car"></i> No credits</span>'}
             </div>
+            ${r.pointCapReached ? `<div class="route-cap-note"><i class="fa-solid fa-circle-info"></i> Trip cap reached: ${ECO_MODEL.caps.perTrip} pts max per trip</div>` : ''}
         </div>
     `).join('');
 }
@@ -879,13 +935,13 @@ function drawRouteOnMap(route) {
             path: pp.path, map,
             strokeColor: pp.color || '#38bdf8',
             strokeWeight: pp.weight || 5,
-            strokeOpacity: 0.85,
+            strokeOpacity: pp.isFallback ? 0.35 : 0.85,
         };
-        if (pp.dash) {
+        if (pp.dash || pp.isFallback) {
             opts.strokeOpacity = 0;
             opts.icons = [{
-                icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeColor: pp.color, scale: 3 },
-                offset: '0', repeat: '12px'
+                icon: { path: 'M 0,-1 0,1', strokeOpacity: pp.isFallback ? 0.45 : 0.7, strokeColor: pp.color, scale: pp.isFallback ? 2 : 3 },
+                offset: '0', repeat: pp.isFallback ? '18px' : '12px'
             }];
         }
         const poly = new google.maps.Polyline(opts);
@@ -958,8 +1014,13 @@ function selectPass(id) {
 }
 
 function purchasePass() {
+    if (bookingInProgress) return;
+    bookingInProgress = true;
     const route = currentRoutes[selectedRouteIdx];
-    if (!route || route.baseline) return;
+    if (!route || route.baseline) {
+        bookingInProgress = false;
+        return;
+    }
 
     // Cooldown check
     const now = Date.now();
@@ -997,6 +1058,7 @@ function purchasePass() {
     // Generate ticket card
     generateTicket(passId, route, pts);
     showToast('Hydra-Pass Issued! 🎫', `${passId} — +${pts} eco points earned`);
+    setTimeout(() => { bookingInProgress = false; }, 500);
 }
 
 function generateTicket(passId, route, pts) {
@@ -1095,10 +1157,22 @@ function drawAnchor(ctx, x, y, s) {
 }
 
 // ─── BLE RADAR ───────────────────────────────────────────────────────────
+function seededBlePercent(index, min = 15, range = 70) {
+    const x = Math.sin(BLE_SCAN_SEED + index * 37.17) * 10000;
+    return Math.floor((x - Math.floor(x)) * range) + min;
+}
+
+function renderMockBLE(statusText = 'Connected (Simulated)') {
+    const t = document.getElementById('ble-timer');
+    if (t) t.textContent = statusText;
+    const coaches = ['C1 Front (Women)','C2','C3','C4 Mid','C5','C6 Rear'];
+    document.getElementById('coach-list').innerHTML = coaches.map((c, i) => coachRow(c, seededBlePercent(i, 12, 78))).join('');
+}
+
 function initBLE() {
     const coaches = ['C1 Front','C2','C3','C4 Mid','C5','C6 Rear'];
-    document.getElementById('coach-list').innerHTML = coaches.map(c => {
-        const p = Math.floor(Math.random()*70)+15;
+    document.getElementById('coach-list').innerHTML = coaches.map((c, i) => {
+        const p = seededBlePercent(i);
         return coachRow(c, p);
     }).join('');
 }
@@ -1113,24 +1187,36 @@ function coachRow(name, pct) {
 async function scanBLE() {
     const t = document.getElementById('ble-timer');
     t.textContent = 'Connecting to BLE...';
+    if (!window.isSecureContext || !navigator.bluetooth) {
+        let n = 3;
+        const iv = setInterval(() => {
+            n--;
+            if (n <= 0) {
+                clearInterval(iv);
+                renderMockBLE('Connected (Simulated)');
+                showToast('BLE Radar Active', 'Using simulated coach data (Web Bluetooth is unavailable in this browser/context).');
+            } else {
+                t.textContent = `Scanning... ${n}s`;
+            }
+        }, 800);
+        return;
+    }
+
     try {
-        if (!navigator.bluetooth) throw new Error("No BLE available on this browser/OS.");
         const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
         t.textContent = 'Connected: ' + (device.name || 'HYDMETRO_BLE');
         showToast('BLE Radar Active', 'Successfully connected to physical coach beacon.');
         
         const coaches = ['C1 Front (Women)','C2','C3','C4 Mid','C5','C6 Rear'];
-        document.getElementById('coach-list').innerHTML = coaches.map(c => coachRow(c, Math.floor(Math.random()*50)+10)).join('');
+        document.getElementById('coach-list').innerHTML = coaches.map((c, i) => coachRow(c, seededBlePercent(i, 10, 50))).join('');
     } catch (e) {
         let n = 3;
         const iv = setInterval(() => {
             n--;
             if (n <= 0) {
                 clearInterval(iv);
-                t.textContent = 'Connected (Mock)';
-                const coaches = ['C1 Front (Women)','C2','C3','C4 Mid','C5','C6 Rear'];
-                document.getElementById('coach-list').innerHTML = coaches.map(c => coachRow(c, Math.floor(Math.random()*85)+5)).join('');
-                showToast('BLE Radar Active', 'Using Mock Radar (Bluetooth disabled or denied)');
+                renderMockBLE('Connected (Simulated)');
+                showToast('BLE Radar Active', 'Using simulated coach data (Web Bluetooth not supported or permission denied).');
             } else {
                 t.textContent = `Scanning... ${n}s`;
             }
@@ -1177,6 +1263,36 @@ function redeem(brand, cost) {
     showToast('Redeemed! 🎉', `${brand} voucher claimed`);
 }
 
+function walletPayloadFromStorage() {
+    return {
+        points: parseInt(localStorage.getItem('ht_pts')) || 0,
+        co2: parseFloat(localStorage.getItem('ht_co2')) || 0,
+        ptsToday: parseInt(localStorage.getItem('ht_ptsd')) || 0,
+        lastTrip: parseInt(localStorage.getItem('ht_lt')) || 0,
+        streak: parseInt(localStorage.getItem('ht_str')) || 0,
+        trips: JSON.parse(localStorage.getItem('ht_trips') || '[]')
+    };
+}
+
+function walletSignature(payload) {
+    const data = JSON.stringify(payload);
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) sum = (sum + data.charCodeAt(i) * (i + 17)) % 1000003;
+    return btoa(`${data.length}:${sum}:hydratransit-demo-wallet`);
+}
+
+function loadWallet() {
+    const payload = walletPayloadFromStorage();
+    const storedSig = localStorage.getItem('ht_wallet_sig');
+    const hasExistingWallet = ['ht_pts','ht_co2','ht_ptsd','ht_lt','ht_str','ht_trips'].some(k => localStorage.getItem(k) !== null);
+    if (hasExistingWallet && storedSig && storedSig !== walletSignature(payload)) {
+        walletIntegrityWarning = true;
+        ['ht_pts','ht_co2','ht_ptsd','ht_lt','ht_str','ht_trips','ht_wallet_sig'].forEach(k => localStorage.removeItem(k));
+        return { points: 0, co2: 0, ptsToday: 0, lastTrip: 0, streak: 0, trips: [] };
+    }
+    return payload;
+}
+
 function saveWallet() {
     localStorage.setItem('ht_pts', wallet.points);
     localStorage.setItem('ht_co2', wallet.co2);
@@ -1184,6 +1300,7 @@ function saveWallet() {
     localStorage.setItem('ht_lt', wallet.lastTrip);
     localStorage.setItem('ht_str', wallet.streak);
     localStorage.setItem('ht_trips', JSON.stringify(wallet.trips));
+    localStorage.setItem('ht_wallet_sig', walletSignature(wallet));
 }
 
 function resetDailyCaps() {
@@ -1191,6 +1308,7 @@ function resetDailyCaps() {
     const today = new Date().toDateString();
     if (last !== today) {
         if (last) { const d = (new Date(today) - new Date(last)) / 86400000; wallet.streak = d <= 1 ? wallet.streak + 1 : 0; }
+        else wallet.streak = 1;
         wallet.ptsToday = 0;
         localStorage.setItem('ht_date', today);
         saveWallet();
@@ -1219,17 +1337,20 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 async function getRoadLeg(from, to, mode) {
     try {
-        const res = await new Promise((resolve) => directionsService.route({
+        const res = await requestDirections({
             origin: from, destination: to, travelMode: google.maps.TravelMode[mode]
-        }, (r, s) => resolve({res: r, status: s})));
+        }, 5000);
         if (res.status === 'OK') {
             const leg = res.res.routes[0].legs[0];
             return {
                 dist: leg.distance.value / 1000,
                 duration: Math.ceil(leg.duration.value / 60),
                 durationText: leg.duration.text,
-                path: res.res.routes[0].overview_path
+                path: res.res.routes[0].overview_path,
+                isFallback: false
             };
+        } else if (res.status === 'OVER_QUERY_LIMIT') {
+            notifyQuotaLimit();
         }
     } catch(e) {}
     
@@ -1243,7 +1364,8 @@ async function getRoadLeg(from, to, mode) {
     const dur = Math.ceil((dist / speed) * 60);
     return {
         dist: dist, duration: dur, durationText: dur + ' min',
-        path: [{lat:lat1,lng:lng1}, {lat:lat2,lng:lng2}]
+        path: [{lat:lat1,lng:lng1}, {lat:lat2,lng:lng2}],
+        isFallback: true
     };
 }
 
@@ -1273,16 +1395,65 @@ function getStationsOnLine(line, startIdx, endIdx) {
     return path;
 }
 
+function metroStation(name) {
+    const station = METRO_STATIONS[name];
+    return station ? { name, mode: 'metro', ...station } : null;
+}
+
+function getMetroInterchangePair(fromLine, toLine) {
+    const pairs = {
+        'red-blue': ['Ameerpet', 'Ameerpet B'],
+        'blue-red': ['Ameerpet B', 'Ameerpet'],
+        'blue-green': ['Parade Ground', 'JBS Parade Ground'],
+        'green-blue': ['JBS Parade Ground', 'Parade Ground'],
+        'red-green': ['MG Bus Station', 'MGBS'],
+        'green-red': ['MGBS', 'MG Bus Station']
+    };
+    const pair = pairs[`${fromLine}-${toLine}`];
+    if (!pair) return null;
+    const fromLineStation = metroStation(pair[0]);
+    const toLineStation = metroStation(pair[1]);
+    return fromLineStation && toLineStation ? { fromLineStation, toLineStation } : null;
+}
+
+function buildStationTransitLeg(fromStation, toStation) {
+    if (!fromStation || !toStation || fromStation.line !== toStation.line) return null;
+    const stns = getStationsOnLine(fromStation.line, fromStation.idx, toStation.idx);
+    if (stns.length < 2) return null;
+    let dist = 0;
+    for (let i = 1; i < stns.length; i++) {
+        dist += getDistance(stns[i - 1].lat, stns[i - 1].lng, stns[i].lat, stns[i].lng);
+    }
+    const mins = Math.ceil(dist * 2);
+    const color = LINE_COLORS[fromStation.line] || '#38bdf8';
+    const live = getLiveTransitDetails('metro', fromStation.name, toStation.name);
+    return {
+        dist,
+        mins,
+        segment: {
+            type: 'metro',
+            name: live.routeNum,
+            fullName: `${fromStation.line} Line Metro`,
+            from: fromStation.name,
+            to: toStation.name,
+            stops: stns.length - 1,
+            depTime: live.liveETA,
+            arrTime: '+' + mins + ' min',
+            dist,
+            color
+        },
+        polyline: { path: stns.map(s => ({ lat: s.lat, lng: s.lng })), color, weight: 6 }
+    };
+}
+
 async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
     if (!s1 || !s2 || s1.name === s2.name) return null;
 
     const startMode = s1.dist > 1.5 ? 'DRIVING' : 'WALKING';
     const endMode = s2.dist > 1.5 ? 'DRIVING' : 'WALKING';
 
-    const [leg1, leg2] = await Promise.all([
-        getRoadLeg(o, {lat: s1.lat, lng: s1.lng}, startMode),
-        getRoadLeg({lat: s2.lat, lng: s2.lng}, d, endMode)
-    ]);
+    const leg1 = await getRoadLeg(o, {lat: s1.lat, lng: s1.lng}, startMode);
+    const leg2 = await getRoadLeg({lat: s2.lat, lng: s2.lng}, d, endMode);
 
     let transitDist = 0, transitMins = 0;
     let segments = [], polylinePaths = [];
@@ -1298,7 +1469,7 @@ async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
             } else { leg1.duration += 10; startDurStr += ' (+10m Uber Wait)'; }
         }
         segments.push({ type: legType, name: legName, dist: leg1.dist, duration: startDurStr });
-        polylinePaths.push({ path: leg1.path, color: startMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true });
+        polylinePaths.push({ path: leg1.path, color: startMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true, isFallback: leg1.isFallback });
     }
 
     if (s1.mode === s2.mode && (s1.mode === 'metro' || s1.mode === 'train') && s1.line === s2.line) {
@@ -1316,6 +1487,19 @@ async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
             dist: transitDist, color: color
         });
         polylinePaths.push({ path: legPath, color: color, weight: 6 });
+    } else if (s1.mode === 'metro' && s2.mode === 'metro' && s1.line !== s2.line) {
+        const interchange = getMetroInterchangePair(s1.line, s2.line);
+        if (interchange) {
+            const firstLeg = buildStationTransitLeg(s1, interchange.fromLineStation);
+            const secondLeg = buildStationTransitLeg(interchange.toLineStation, s2);
+            [firstLeg, secondLeg].forEach(leg => {
+                if (!leg) return;
+                segments.push(leg.segment);
+                polylinePaths.push(leg.polyline);
+                transitDist += leg.dist;
+                transitMins += leg.mins;
+            });
+        }
     } else {
         const tLeg = await getRoadLeg({lat: s1.lat, lng: s1.lng}, {lat: s2.lat, lng: s2.lng}, 'DRIVING');
         transitDist = tLeg.dist;
@@ -1332,7 +1516,7 @@ async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
             depTime: live.liveETA, arrTime: '+' + transitMins + ' min',
             dist: transitDist, color: color
         });
-        polylinePaths.push({ path: tLeg.path, color: color, weight: 6 });
+        polylinePaths.push({ path: tLeg.path, color: color, weight: 6, isFallback: tLeg.isFallback });
     }
 
     if (leg2.dist > 0.05) {
@@ -1346,11 +1530,14 @@ async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
             } else { leg2.duration += 10; endDurStr += ' (+10m Uber Wait)'; }
         }
         segments.push({ type: legType, name: legName, dist: leg2.dist, duration: endDurStr });
-        polylinePaths.push({ path: leg2.path, color: endMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true });
+        polylinePaths.push({ path: leg2.path, color: endMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true, isFallback: leg2.isFallback });
     }
+
+    if (transitDist === 0) return null;
 
     const totalDist = leg1.dist + transitDist + leg2.dist;
     const totalMins = leg1.duration + transitMins + leg2.duration;
+    const pointDetails = calcRoutePointDetails(segments, modeClass === 'multi');
     
     return {
         type: 'transit', idx: 98,
@@ -1362,7 +1549,9 @@ async function buildSyntheticRoute(o, d, s1, s2, modeClass) {
         fare: estimateFare(segments),
         segments, polylinePaths,
         co2Saved: calcCO2Saved(totalDist, segments),
-        points: calcRoutePoints(segments, modeClass === 'multi'),
+        points: pointDetails.capped,
+        rawPoints: pointDetails.raw,
+        pointCapReached: pointDetails.capReached,
         recommended: modeClass === 'multi', fastest: false,
         depTime: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
         arrTime: new Date(Date.now() + totalMins*60000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
@@ -1404,12 +1593,10 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
     const startMode = oBest.dist > 1.5 ? 'DRIVING' : 'WALKING';
     const endMode = dBest.dist > 1.5 ? 'DRIVING' : 'WALKING';
 
-    const [leg1, t1, t2, leg2] = await Promise.all([
-        getRoadLeg(o, {lat: oBest.lat, lng: oBest.lng}, startMode),
-        getRoadLeg({lat: oBest.lat, lng: oBest.lng}, {lat: ix.lat, lng: ix.lng}, 'DRIVING'),
-        getRoadLeg({lat: ix.lat, lng: ix.lng}, {lat: dBest.lat, lng: dBest.lng}, 'DRIVING'),
-        getRoadLeg({lat: dBest.lat, lng: dBest.lng}, d, endMode)
-    ]);
+    const leg1 = await getRoadLeg(o, {lat: oBest.lat, lng: oBest.lng}, startMode);
+    const t1 = await getRoadLeg({lat: oBest.lat, lng: oBest.lng}, {lat: ix.lat, lng: ix.lng}, 'DRIVING');
+    const t2 = await getRoadLeg({lat: ix.lat, lng: ix.lng}, {lat: dBest.lat, lng: dBest.lng}, 'DRIVING');
+    const leg2 = await getRoadLeg({lat: dBest.lat, lng: dBest.lng}, d, endMode);
 
     let segments = [], polylinePaths = [];
 
@@ -1425,7 +1612,7 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
             } else { leg1.duration += 10; startDurStr += ' (+10m Uber Wait)'; }
         }
         segments.push({ type: legType, name: legName, dist: leg1.dist, duration: startDurStr });
-        polylinePaths.push({ path: leg1.path, color: startMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true });
+        polylinePaths.push({ path: leg1.path, color: startMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true, isFallback: leg1.isFallback });
     }
 
     // 2. Transit 1
@@ -1438,7 +1625,7 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
         depTime: live1.liveETA, arrTime: '+' + min1 + ' min',
         dist: t1.dist, color: color1
     });
-    polylinePaths.push({ path: t1.path, color: color1, weight: 6 });
+    polylinePaths.push({ path: t1.path, color: color1, weight: 6, isFallback: t1.isFallback });
 
     // 3. Transit 2
     const color2 = dBest.mode === 'metro' ? (dBest.line?LINE_COLORS[dBest.line]:'#f43f5e') : dBest.mode === 'train' ? '#00897B' : '#7B1FA2';
@@ -1449,7 +1636,7 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
         depTime: '+' + min1 + ' min', arrTime: '+' + (min1+min2) + ' min',
         dist: t2.dist, color: color2
     });
-    polylinePaths.push({ path: t2.path, color: color2, weight: 6 });
+    polylinePaths.push({ path: t2.path, color: color2, weight: 6, isFallback: t2.isFallback });
 
     // 4. Walk/Auto
     if (leg2.dist > 0.05) {
@@ -1463,11 +1650,12 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
             } else { leg2.duration += 10; endDurStr += ' (+10m Uber Wait)'; }
         }
         segments.push({ type: legType, name: legName, dist: leg2.dist, duration: endDurStr });
-        polylinePaths.push({ path: leg2.path, color: endMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true });
+        polylinePaths.push({ path: leg2.path, color: endMode==='WALKING'?'#a78bfa':legType==='bus'?'#38bdf8':'#fbbf24', weight: 3, dash: true, isFallback: leg2.isFallback });
     }
 
     const totalDist = leg1.dist + t1.dist + t2.dist + leg2.dist;
     const totalMins = leg1.duration + min1 + min2 + leg2.duration;
+    const pointDetails = calcRoutePointDetails(segments, true);
 
     return {
         type: 'transit', idx: 98,
@@ -1479,7 +1667,9 @@ async function buildTrueMultiModal(o, d, ixRank = 0) {
         fare: estimateFare(segments),
         segments, polylinePaths,
         co2Saved: calcCO2Saved(totalDist, segments),
-        points: calcRoutePoints(segments, true),
+        points: pointDetails.capped,
+        rawPoints: pointDetails.raw,
+        pointCapReached: pointDetails.capReached,
         recommended: true, fastest: false,
         depTime: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
         arrTime: new Date(Date.now() + totalMins*60000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
@@ -1495,13 +1685,21 @@ async function generateAllSyntheticRoutes(o, d) {
     const oBus = findNearestByDB(o, BUS_HUBS, 'bus');
     const dBus = findNearestByDB(d, BUS_HUBS, 'bus');
 
-    const routes = await Promise.all([
-        buildSyntheticRoute(o, d, oMetro, dMetro, 'metro'),
-        buildSyntheticRoute(o, d, oTrain, dTrain, 'train'),
-        buildSyntheticRoute(o, d, oBus, dBus, 'bus'),
-        buildTrueMultiModal(o, d, 0),
-        buildTrueMultiModal(o, d, 1)
-    ]);
+    const builders = [
+        () => buildSyntheticRoute(o, d, oMetro, dMetro, 'metro'),
+        () => buildSyntheticRoute(o, d, oTrain, dTrain, 'train'),
+        () => buildSyntheticRoute(o, d, oBus, dBus, 'bus'),
+        () => buildTrueMultiModal(o, d, 0),
+        () => buildTrueMultiModal(o, d, 1)
+    ];
+    const routes = [];
+    for (const build of builders) {
+        try {
+            routes.push(await build());
+        } catch (e) {
+            console.warn('Synthetic route builder failed:', e);
+        }
+    }
     return routes.filter(r => r !== null);
 }
 
@@ -1641,6 +1839,12 @@ function renderEbikes() {
     const container = document.getElementById('ebike-list');
     if (!container) return;
     const availLabel = (TRANSLATIONS[currentLanguage] && TRANSLATIONS[currentLanguage].ebike_available) || 'available';
+    const baseLat = originPlace?.geometry?.location
+        ? (typeof originPlace.geometry.location.lat === 'function' ? originPlace.geometry.location.lat() : originPlace.geometry.location.lat)
+        : 17.4100;
+    const baseLng = originPlace?.geometry?.location
+        ? (typeof originPlace.geometry.location.lng === 'function' ? originPlace.geometry.location.lng() : originPlace.geometry.location.lng)
+        : 78.4500;
 
     // Generate simulated live data for each station
     container.innerHTML = EBIKE_STATIONS.map(station => {
@@ -1651,6 +1855,8 @@ function renderEbikes() {
         const battery = Math.floor(((Math.sin(seed * 3.7) + 1) / 2) * 70) + 20;
         const batClass = battery >= 60 ? 'high' : battery >= 30 ? 'mid' : 'low';
         const availClass = avail >= 5 ? 'high' : avail >= 2 ? 'mid' : 'low';
+        const distM = Math.round(getDistance(baseLat, baseLng, station.lat, station.lng) * 1000);
+        const distanceLabel = distM >= 1000 ? `${(distM / 1000).toFixed(1)}km away` : `${distM}m away`;
 
         return `<div class="ebike-card">
             <div class="ebike-icon ${station.icon}">
@@ -1658,7 +1864,7 @@ function renderEbikes() {
             </div>
             <div class="ebike-details">
                 <div class="ebike-station">${station.station}</div>
-                <div class="ebike-provider">${station.provider} · ${(station.lat * 78).toFixed(0)}m away</div>
+                <div class="ebike-provider">${station.provider} · ${distanceLabel}</div>
                 <div class="ebike-meta">
                     <span class="ebike-avail ${availClass}">${avail}/${totalDocks} ${availLabel}</span>
                     <span class="ebike-battery">

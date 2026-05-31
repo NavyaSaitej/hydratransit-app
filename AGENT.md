@@ -20,6 +20,8 @@ Website Link:- https://hydratransit-app.vercel.app
 
 **Deployment:** Vercel static deployment at `https://hydratransit-app.vercel.app`
 
+**Current Checkpoint:** Read `STRESS_TEST_CHECKPOINT.md` when continuing stress-test remediation work.
+
 ## Current Architecture
 
 ```text
@@ -31,6 +33,7 @@ Website Link:- https://hydratransit-app.vercel.app
 |-- HydraTransit_Hackathon_Pitch.pptx
 |-- AGENT.md                  # AI agent handoff and continuation guide
 |-- CONTRIBUTING.md           # Open source contributor guide
+|-- STRESS_TEST_CHECKPOINT.md # Current remediation checkpoint and resume notes
 |-- README.md                 # User-facing project documentation
 |-- .gitignore
 `-- .gitlab-ci.yml
