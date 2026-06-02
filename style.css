@@ -818,8 +818,6 @@ body.light-mode #toast h5 {
   border-color: var(--color-primary);
 }
 
-/* ui-refresh: 2026-06-02T12:35:10 */
-
 /* ─── STATS TAB ─── */
 .recent-trip-card {
   background: var(--surface-raised);
@@ -866,3 +864,4 @@ body.light-mode #toast h5 {
   text-align: center;
   flex: 1;
 }
+/* ui-refresh: 2026-06-02T15:13:15 */
