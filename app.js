@@ -1254,37 +1254,7 @@ function initBLE() {
     }).join('');
 }
 
-// ─── DYNAMIC API KEY LOADING ───
-function checkAndLoadMap() {
-    const storedKey = localStorage.getItem('gmaps_api_key');
-    if (storedKey) {
-        loadGoogleMapsScript(storedKey);
-    } else {
-        document.getElementById('api-key-modal').style.display = 'flex';
-    }
-}
 
-function saveApiKey() {
-    const input = document.getElementById('api-key-input').value.trim();
-    if (input) {
-        localStorage.setItem('gmaps_api_key', input);
-        document.getElementById('api-key-modal').style.display = 'none';
-        loadGoogleMapsScript(input);
-    } else {
-        alert("Please enter a valid API key.");
-    }
-}
-
-function loadGoogleMapsScript(apiKey) {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-}
-
-// Call immediately since script is at the end of body
-checkAndLoadMap();
 
 function coachRow(name, pct) {
     const cls = pct < 45 ? 'low' : pct < 75 ? 'mid' : 'high';
