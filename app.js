@@ -306,6 +306,7 @@ let selectedRouteIdx = 0;
 let isMonsoonMode = false;
 let isSafeMode = false;
 let isVoiceMode = false;
+let isEbikeMode = false;
 let selectedPassType = 'single';
 let currentLanguage = localStorage.getItem('ht_lang') || 'en';
 let currentTheme = localStorage.getItem('ht_theme') || 'dark';
@@ -686,6 +687,26 @@ function processAndSortRoutes() {
                 });
             }
 
+            if (isEbikeMode) {
+                // Convert walks > 3 mins to ebike
+                r.segments.forEach(s => {
+                    if (s.type === 'walk' && parseInt(s.duration) > 3) {
+                        s.type = 'ebike';
+                        s.icon = 'fa-bicycle';
+                        s.name = 'Yulu E-Bike';
+                        s.duration = Math.round(parseInt(s.duration) / 3) + ' min';
+                        s.color = '#38bdf8';
+                        fValue += 10; // Add 10 rs for Yulu
+                    }
+                });
+                // Reduce overall duration since walks are now ebikes
+                r.durationValue = Math.max(10, r.durationValue - (walkDist * 5));
+                r.duration = r.durationValue + ' min';
+                r.fare = `₹${fValue}`;
+                r.co2Saved = (parseFloat(r.co2Saved) + 0.5).toFixed(1);
+                r.points += 20;
+            }
+
             const score = (r.durationValue / 60) * 2 + fValue - (co2 * 10) + cabPenalty + monsoonPenalty + safePenalty;
             if (score < bestScore) {
                 bestScore = score;
@@ -929,11 +950,11 @@ function renderRouteCards() {
 
 function renderTimeline(segments) {
     return '<div class="journey-timeline">' + segments.map((s, i) => {
-        const icon = s.type === 'metro' ? 'fa-train-subway' : s.type === 'bus' ? 'fa-bus' : s.type === 'train' ? 'fa-train' : s.type === 'cab' ? 'fa-taxi' : 'fa-person-walking';
-        const dotClass = s.type === 'walk' ? 'walk' : s.type === 'cab' ? 'walk' : s.type;
+        const icon = s.type === 'metro' ? 'fa-train-subway' : s.type === 'bus' ? 'fa-bus' : s.type === 'train' ? 'fa-train' : s.type === 'cab' ? 'fa-taxi' : s.type === 'ebike' ? 'fa-bicycle' : 'fa-person-walking';
+        const dotClass = s.type === 'walk' ? 'walk' : s.type === 'cab' ? 'walk' : s.type === 'ebike' ? 'metro' : s.type;
         const isLast = i === segments.length - 1;
         let detail = '';
-        if (s.type !== 'walk' && s.type !== 'cab' && s.from) {
+        if (s.type !== 'walk' && s.type !== 'cab' && s.type !== 'ebike' && s.from) {
             const isLive = s.depTime && s.depTime.includes('Live');
             const liveBadge = isLive ? `<span class="live-dot pulse" style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-right:4px;animation:pulse 1.5s infinite;"></span>` : '';
             detail = `<div class="tl-transit-info">
@@ -1836,6 +1857,41 @@ function toggleVoiceMode() {
         showToast('Voice Guide Off', 'Voice navigation disabled.');
         closeVoicePlayer();
     }
+}
+
+function toggleEbikeMode() {
+    isEbikeMode = document.getElementById('ebike-toggle').checked;
+    if (isEbikeMode) {
+        showToast('E-Bike Mode Active', 'Long walks are now replaced with Yulu rides.');
+    } else {
+        showToast('E-Bike Mode Off', 'Normal walking segments restored.');
+    }
+    if (originPlace && destPlace) {
+        findRoutes();
+    }
+}
+
+function triggerSOS() {
+    // Add flash animation
+    const flash = document.createElement('div');
+    flash.className = 'sos-flash';
+    document.body.appendChild(flash);
+    
+    // Show urgent toast
+    const toast = document.getElementById('toast');
+    toast.style.background = '#DC2626';
+    toast.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i><div><h5 style="color:white;margin:0;">Emergency SOS Triggered</h5><p style="color:white;margin:0;">Live location shared with Police & Emergency Contacts.</p></div>';
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        document.body.removeChild(flash);
+        // Reset toast style for future standard toasts
+        setTimeout(() => {
+            toast.style.background = '';
+            toast.innerHTML = '<i class="fa-solid fa-circle-check"></i><div><h5 id="toast-title"></h5><p id="toast-desc"></p></div>';
+        }, 300);
+    }, 4000);
 }
 
 function playVoiceGuidance() {
