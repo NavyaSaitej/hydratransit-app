@@ -121,3 +121,5 @@ Route calculations use Google Maps services and local transit datasets to provid
 ## License
 
 No license file is currently included in this repository.
+
+<!-- auto-sync: 2026-06-02T11:37:22 -->
