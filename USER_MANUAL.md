@@ -1,54 +1,215 @@
-# HydraTransit — User Manual
+# HydraTransit User Manual
 
-Welcome to **HydraTransit**! This application is designed to be the ultimate multi-modal transit companion for Hyderabad. Whether you are taking the Metro, hopping on a TSRTC bus, or booking a last-mile auto, this guide will show you how to navigate the app.
+Welcome to HydraTransit. This guide explains how to use the app to plan trips, compare multi-modal routes, generate a HydraPass, track Eco Carbon Rewards, and use the live coach crowding demo.
 
----
+Website Link:- https://hydratransit-app.vercel.app
 
-## 1. Planning a Trip
-The core feature of HydraTransit is finding the best way to get around the city.
+## What HydraTransit Does
 
-1. **Enter Origin & Destination:** Use the search boxes on the left sidebar. As you type, Google Places will automatically suggest addresses and landmarks in Hyderabad.
-2. **Find Best Routes:** Click the primary blue button. The app will calculate multiple transit options combining walking, Metro, MMTS trains, and buses.
-3. **Compare Options:** Routes will appear in a list. You can easily compare them based on:
-   - **Cost:** Total fare for the trip.
-   - **Time:** Total duration.
-   - **Eco-friendliness:** How much CO₂ you save compared to driving a private car.
-4. **Badges:** Look for the **"Fastest"**, **"Best Overall"**, and **"Eco"** badges to quickly pick the best route for your needs.
+HydraTransit is a multi-modal transit companion for Hyderabad, Telangana. It helps you combine Hyderabad Metro Rail, TSRTC buses, MMTS local trains, walking, shared autos, and e-bike options into one planned journey.
 
-## 2. Navigating the Map
-When you select a route from the list, the map will smoothly fly to show your exact path.
-- **Solid Lines:** Represent rail networks (Metro/MMTS).
-- **Dotted Lines:** Represent TSRTC Bus routes.
-- **Dashed White Lines:** Represent walking segments.
-- **Seamless Zoom:** Use your scroll wheel or trackpad to smoothly zoom in and out of the high-definition vector map.
+The app is designed for quick route comparison, lower-carbon travel decisions, and a unified demo ticketing experience.
 
-## 3. Purchasing a HydraPass
-Instead of buying separate tickets for buses and metros, you can buy a unified digital ticket.
+## Getting Started
 
-1. After selecting your preferred route, click **"Get HydraPass for Selected"**.
-2. Review the invoice breakdown (Base Fare + Last Mile + Platform fees).
-3. Select a **Pass Type** (Single Journey, Day Pass, or Weekend Pass).
-4. **Generate Ticket:** Your digital ticket will instantly generate with a QR code. You can scan this at any Metro turnstile or show it to a bus conductor.
+Open the live app:
 
-## 4. Eco Rewards (Green Credits)
-HydraTransit gamifies public transport by rewarding you for reducing your carbon footprint.
+```text
+https://hydratransit-app.vercel.app
+```
 
-- Every time you take a public transit route instead of a private car, you earn **Green Credits (+pts)**.
-- Navigate to the **"Eco"** tab in the sidebar to view your total credits and current streak.
-- **Redeem:** Scroll down to the "Rewards Store" to trade your credits for discounts at popular local spots (like Niloufer Cafe, Karachi Bakery, or BookMyShow).
+Or run it locally:
 
-## 5. Live Tracking (Demo Feature)
-HydraTransit includes a proof-of-concept for real-time coach tracking using simulated Bluetooth Low Energy (BLE).
+```bash
+# Using Python 3.x
+python -m http.server 8000
 
-- Go to the **"Live"** tab in the sidebar.
-- You can monitor the real-time crowd density of approaching Metro coaches (Low, Medium, High).
-- Use this to decide whether to board the first coach or walk down the platform to a less crowded one!
+# Using Node.js
+npx http-server -p 8000
+```
 
-## 6. Installing the App (PWA)
-HydraTransit is a Progressive Web App (PWA). You don't need to download it from an App Store.
+Then open:
 
-- **On Mobile (Chrome/Safari):** Open the website, tap your browser's menu, and select **"Add to Home Screen"**. It will install like a native app and work offline!
-- **On Desktop (Chrome/Edge):** Look for the install icon (a screen with a down arrow) in the right side of your URL bar.
+```text
+http://localhost:8000
+```
 
----
-*Happy Commuting!*
+No account, installation, or dependency setup is required.
+
+## Planning a Trip
+
+Use the route planner to find the best way across Hyderabad.
+
+1. Enter your starting location in the origin field.
+2. Enter your destination in the destination field.
+3. Use the location suggestions when they appear.
+4. Start the route search.
+5. Review the route cards shown in the sidebar.
+
+Each route card may include:
+
+- Travel time
+- Estimated cost
+- Transit modes used
+- Carbon savings
+- Eco points earned
+- Route quality labels such as fastest, balanced, or eco-friendly
+
+Select a route card to view it on the map and use it for HydraPass generation.
+
+## Understanding Route Modes
+
+HydraTransit can combine several transport modes in one route.
+
+**Metro:** Fast rail segments across Hyderabad Metro lines.
+
+**MMTS:** Local train segments where useful.
+
+**TSRTC Bus:** Bus hub and connector segments.
+
+**Walking:** First-mile, last-mile, or transfer walking segments.
+
+**Shared Auto:** Last-mile connector option for short hops.
+
+**E-Bike:** Micro-mobility option near supported Metro stations.
+
+## Using the Map
+
+The map displays the city context, transit network, and selected route path.
+
+Use the map to:
+
+- See your route visually.
+- Compare where different route segments occur.
+- Identify station and hub markers.
+- Follow the selected route from origin to destination.
+
+If the map does not load, refresh the page and check that your browser allows the Google Maps script to run.
+
+## Using HydraPass
+
+HydraPass is the app's unified ticketing demo.
+
+1. Search for a route.
+2. Select your preferred route.
+3. Open the Pass or HydraPass panel.
+4. Choose the pass type if options are shown.
+5. Generate the ticket.
+6. View the QR-style pass card.
+
+The HydraPass QR is generated with HTML5 Canvas for demo purposes. It is a visual prototype and is not connected to a real Metro, MMTS, or TSRTC fare system.
+
+## Eco Carbon Rewards
+
+HydraTransit rewards greener route choices with Eco points.
+
+You can earn points when choosing routes that reduce car usage by using:
+
+- Metro
+- MMTS
+- TSRTC bus
+- Walking
+- E-bike connectors
+
+The Eco panel shows your:
+
+- Total Eco points
+- Carbon savings
+- Trip activity
+- Streak or progress indicators
+- Available reward options
+
+Rewards may include demo vouchers for local brands such as Niloufer Cafe, Karachi Bakery, and Metro-related offers.
+
+## Redeeming Rewards
+
+To redeem a reward:
+
+1. Open the Eco or Rewards panel.
+2. Review available vouchers.
+3. Check the points required.
+4. Select a reward you can afford.
+5. Confirm redemption.
+
+Reward redemption is part of the app demo and does not issue real commercial vouchers.
+
+## Live Coach Radar
+
+The Live or BLE panel simulates Metro coach crowding.
+
+Use it to:
+
+- Start a coach scan.
+- View simulated crowd levels.
+- Compare coach density such as Low, Mid, or High.
+- Decide which coach would be more comfortable to board.
+
+If Bluetooth is unavailable or permission is denied, the app can still show simulated demo data.
+
+## State Persistence
+
+HydraTransit stores app state in your browser with `localStorage`.
+
+This can preserve:
+
+- Eco points
+- Carbon savings
+- Trip history
+- Streak data
+- Active wallet or pass state
+
+To reset your local app state, clear site data for the app in your browser settings, or clear localStorage from developer tools.
+
+## Mobile Usage
+
+The app is responsive and works on phone, tablet, and desktop screens.
+
+For the best mobile experience:
+
+- Use a modern browser.
+- Keep location permissions enabled if your workflow needs them.
+- Rotate to landscape if you want a wider map view.
+- Refresh if a map or route panel appears stuck after resizing.
+
+## Troubleshooting
+
+**Map does not load:** Check your internet connection and refresh the page.
+
+**Location suggestions do not appear:** Make sure the page is online and Google Maps services are available.
+
+**Route search gives limited results:** Try a clearer Hyderabad landmark or station name.
+
+**HydraPass does not generate:** Select a route first, then open the pass panel.
+
+**Eco points look old:** Clear browser localStorage for the site and reload.
+
+**BLE scan is unavailable:** Continue with the simulated crowding demo.
+
+## Important Notes
+
+- The app is a static web demo.
+- There is no backend database or user login.
+- HydraPass QR codes are visual prototypes.
+- Rewards are demo vouchers, not real commercial redemptions.
+- Route and fare values are estimates for demonstration.
+- Google Maps services require internet access.
+
+## Quick User Flow
+
+```text
+Open app -> Enter origin and destination -> Search routes -> Select route -> Generate HydraPass -> Earn Eco points -> Redeem demo reward
+```
+
+## Getting Help
+
+For project setup and technical contribution details, read:
+
+- `README.md`
+- `CONTRIBUTING.md`
+- `AGENT.md`
+
+For source-level behavior, inspect:
+
+- `index.html`
+- `app.js`
+- `style.css`
