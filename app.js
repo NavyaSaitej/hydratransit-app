@@ -307,6 +307,7 @@ let isMonsoonMode = false;
 let isSafeMode = false;
 let isVoiceMode = false;
 let isEbikeMode = false;
+let passengerCount = 1;
 let selectedPassType = 'single';
 let currentLanguage = localStorage.getItem('ht_lang') || 'en';
 let currentTheme = localStorage.getItem('ht_theme') || 'dark';
@@ -984,9 +985,17 @@ function selectRoute(idx) {
 
     // Enable booking if not baseline
     const btn = document.getElementById('book-btn');
-    btn.disabled = route.baseline;
-    btn.style.opacity = route.baseline ? '0.3' : '1';
-    btn.style.cursor = route.baseline ? 'not-allowed' : 'pointer';
+    const splitBtn = document.getElementById('split-btn');
+    if (btn) {
+        btn.disabled = route.baseline;
+        btn.style.opacity = route.baseline ? '0.3' : '1';
+        btn.style.cursor = route.baseline ? 'not-allowed' : 'pointer';
+    }
+    if (splitBtn) {
+        splitBtn.disabled = route.baseline || passengerCount === 1;
+        splitBtn.style.opacity = (route.baseline || passengerCount === 1) ? '0.3' : '1';
+        splitBtn.style.cursor = (route.baseline || passengerCount === 1) ? 'not-allowed' : 'pointer';
+    }
 
     if (isVoiceMode) {
         playVoiceGuidance();
@@ -1110,22 +1119,28 @@ function purchasePass() {
     switchTab('pass');
     const passId = 'HT-' + Date.now().toString(36).toUpperCase();
 
-    // Award points (capped)
-    let pts = route.points;
+    // Award points (capped) multiplied by passengers
+    let pts = route.points * passengerCount;
     if (wallet.ptsToday + pts > ECO_MODEL.caps.daily) {
         pts = Math.max(0, ECO_MODEL.caps.daily - wallet.ptsToday);
     }
 
     wallet.points += pts;
-    wallet.co2 += parseFloat(route.co2Saved);
+    wallet.co2 += (parseFloat(route.co2Saved) * passengerCount);
     wallet.ptsToday += pts;
     wallet.lastTrip = now;
+    
+    let totalFareStr = route.fare;
+    if (passengerCount > 1) {
+        const fareNum = parseInt(route.fare.replace('₹',''));
+        totalFareStr = `₹${fareNum * passengerCount}`;
+    }
 
     // Save trip history
     wallet.trips.unshift({
         id: passId, date: new Date().toISOString(),
-        route: route.title, fare: route.fare,
-        co2: route.co2Saved, pts,
+        route: route.title, fare: totalFareStr,
+        co2: (parseFloat(route.co2Saved) * passengerCount).toFixed(1), pts,
         segments: route.segments.filter(s=>s.type!=='walk').map(s=>s.name).join(' → ')
     });
     if (wallet.trips.length > 20) wallet.trips = wallet.trips.slice(0, 20);
@@ -1133,12 +1148,49 @@ function purchasePass() {
     updateWalletUI();
 
     // Generate ticket card
-    generateTicket(passId, route, pts);
+    generateTicket(passId, route, pts, passengerCount, totalFareStr);
     showToast('Hydra-Pass Issued! 🎫', `${passId} — +${pts} eco points earned`);
     setTimeout(() => { bookingInProgress = false; }, 500);
 }
 
-function generateTicket(passId, route, pts) {
+function updatePassengerCount(delta) {
+    passengerCount += delta;
+    if (passengerCount < 1) passengerCount = 1;
+    if (passengerCount > 5) passengerCount = 5;
+    document.getElementById('passenger-count').innerText = passengerCount;
+    
+    const splitBtn = document.getElementById('split-btn');
+    if (passengerCount > 1) {
+        splitBtn.style.display = 'block';
+    }
+}
+
+function openUpiSplit() {
+    if (selectedRouteIdx < 0 || !currentRoutes[selectedRouteIdx]) return;
+    const route = currentRoutes[selectedRouteIdx];
+    const fareNum = parseInt(route.fare.replace('₹',''));
+    
+    document.getElementById('upi-share-amount').innerText = `₹${fareNum}`;
+    document.getElementById('upi-modal').style.display = 'flex';
+    
+    // Simulate friends paying
+    const status = document.getElementById('upi-status');
+    status.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for ${passengerCount - 1} payments...`;
+    
+    setTimeout(() => {
+        status.innerHTML = `<i class="fa-solid fa-check-circle"></i> Payments collected! Generating group pass...`;
+        setTimeout(() => {
+            document.getElementById('upi-modal').style.display = 'none';
+            purchasePass();
+        }, 1500);
+    }, 3000);
+}
+
+function cancelUpiSplit() {
+    document.getElementById('upi-modal').style.display = 'none';
+}
+
+function generateTicket(passId, route, pts, pax = 1, fareStr = route.fare) {
     const segs = route.segments.filter(s => s.type !== 'walk');
     const mainSeg = segs[0] || {};
     const modeGradient = mainSeg.type === 'bus'
@@ -1172,7 +1224,7 @@ function generateTicket(passId, route, pts) {
             <div class="ticket-details-grid">
                 <div><span class="td-label">DATE</span><span class="td-val">${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>
                 <div><span class="td-label">TIME</span><span class="td-val">${route.depTime || new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span></div>
-                <div><span class="td-label">FARE</span><span class="td-val fare-val">${route.fare}</span></div>
+                <div><span class="td-label">FARE</span><span class="td-val fare-val">${fareStr} <span style="font-size:10px;opacity:0.8">(${pax} Pax)</span></span></div>
                 <div><span class="td-label">PASS</span><span class="td-val">${PASS_TYPES.find(p=>p.id===selectedPassType)?.name || 'Single'}</span></div>
             </div>
             <div class="ticket-divider"></div>
