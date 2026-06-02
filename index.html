@@ -58,6 +58,13 @@
                             <span class="slider"></span>
                         </div>
                     </label>
+                    <label class="toggle-label">
+                        <span class="toggle-text">🗣️ Voice Guide</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="voice-toggle" onchange="toggleVoiceMode()">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
                 </div>
                 <div id="monsoon-banner" class="monsoon-banner" style="display: none;">
                     <i class="fa-solid fa-cloud-showers-heavy"></i> Heavy rain alert! Expect delays & surge pricing. Metro is recommended.
@@ -288,6 +295,18 @@
             <input type="text" id="api-key-input" placeholder="AIzaSy..." autocomplete="off" class="api-key-input">
             <button onclick="saveApiKey()" class="search-btn" style="margin-top: 15px;">Save & Load Map</button>
         </div>
+    </div>
+
+    <!-- FLOATING VOICE NAVIGATION PLAYER -->
+    <div id="voice-player" class="voice-player glass-card" style="display: none;">
+        <div class="vp-icon">
+            <i class="fa-solid fa-microphone-lines fa-bounce"></i>
+        </div>
+        <div class="vp-content">
+            <div class="vp-title">Voice Navigation</div>
+            <div id="vp-text" class="vp-text">Loading instructions...</div>
+        </div>
+        <button class="vp-close" onclick="closeVoicePlayer()"><i class="fa-solid fa-times"></i></button>
     </div>
 
     <!-- SCRIPTS -->

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hydratransit-v5';
+const CACHE_NAME = 'hydratransit-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

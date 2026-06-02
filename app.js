@@ -305,6 +305,7 @@ let destinationCoords = null;
 let selectedRouteIdx = 0;
 let isMonsoonMode = false;
 let isSafeMode = false;
+let isVoiceMode = false;
 let selectedPassType = 'single';
 let currentLanguage = localStorage.getItem('ht_lang') || 'en';
 let currentTheme = localStorage.getItem('ht_theme') || 'dark';
@@ -965,6 +966,12 @@ function selectRoute(idx) {
     btn.disabled = route.baseline;
     btn.style.opacity = route.baseline ? '0.3' : '1';
     btn.style.cursor = route.baseline ? 'not-allowed' : 'pointer';
+
+    if (isVoiceMode) {
+        playVoiceGuidance();
+    } else {
+        closeVoicePlayer();
+    }
 }
 
 function clearMapOverlays() {
@@ -1817,6 +1824,39 @@ function toggleSafeMode() {
         findRoutes();
     }
 }
+
+function toggleVoiceMode() {
+    isVoiceMode = document.getElementById('voice-toggle').checked;
+    if (isVoiceMode) {
+        showToast('Voice Guide Active', 'Navigation will play in your selected language.');
+        if (selectedRouteIdx >= 0 && currentRoutes[selectedRouteIdx]) {
+            playVoiceGuidance();
+        }
+    } else {
+        showToast('Voice Guide Off', 'Voice navigation disabled.');
+        closeVoicePlayer();
+    }
+}
+
+function playVoiceGuidance() {
+    const player = document.getElementById('voice-player');
+    const textEl = document.getElementById('vp-text');
+    player.style.display = 'flex';
+    
+    let text = "Head straight and alight at the Metro station..."; // en
+    if (currentLanguage === 'te') {
+        text = "Mundhuku velli, Metro station lo digandi...";
+    } else if (currentLanguage === 'hi') {
+        text = "Aage badhein aur Metro station par utrein...";
+    }
+    
+    textEl.innerHTML = `<span style="font-weight:400; font-size:11px; color:var(--text-tertiary);">Now playing:</span><br/>"${text}"`;
+}
+
+function closeVoicePlayer() {
+    document.getElementById('voice-player').style.display = 'none';
+}
+
 // ─── LANGUAGE SWITCHER ───────────────────────────────────────────────────
 function setLanguage(lang) {
     currentLanguage = lang;
