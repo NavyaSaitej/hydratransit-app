@@ -2088,4 +2088,3 @@ function renderEbikes() {
         </div>`;
     }).join('');
 }
->>>>>>> origin/main
