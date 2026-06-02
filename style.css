@@ -819,3 +819,50 @@ body.light-mode #toast h5 {
 }
 
 /* ui-refresh: 2026-06-02T12:35:10 */
+
+/* ─── STATS TAB ─── */
+.recent-trip-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s;
+}
+.recent-trip-card:hover { border-color: var(--color-primary); }
+.rtc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rtc-route { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rtc-fare { font-size: 12px; font-weight: 700; color: var(--color-primary); }
+.rtc-meta { font-size: 10px; color: var(--text-tertiary); }
+.rtc-segments { font-size: 11px; color: var(--text-secondary); margin-top:2px; }
+
+.equiv-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.equiv-icon {
+  font-size: 24px;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.equiv-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.equiv-val { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+
+.chart-bar-label {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-align: center;
+  flex: 1;
+}

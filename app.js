@@ -462,6 +462,123 @@ function switchTab(tabId, triggerBtn = null) {
     const panel = document.getElementById(`tab-${tabId}`);
     if (panel) panel.classList.add('active');
     if (tabId === 'ble') scanBLE();
+    if (tabId === 'stats') renderStatsTab();
+}
+
+// ─── TRIP STATS TAB ──────────────────────────────────────────────────────
+function renderStatsTab() {
+    const trips = wallet.trips || [];
+    const totalCo2 = parseFloat(wallet.co2 || 0);
+
+    // Quick summary stats
+    let totalSpent = 0;
+    trips.forEach(t => {
+        const n = parseInt((t.fare || '').replace('₹','').replace(/[^0-9]/g,'')) || 0;
+        totalSpent += n;
+    });
+    const trees = (totalCo2 / 21).toFixed(2); // avg tree absorbs ~21kg CO2/yr
+    const kmSaved = (totalCo2 / 0.12).toFixed(0); // ~120g CO2/km for car
+
+    document.getElementById('stat-total-trips').innerText = trips.length;
+    document.getElementById('stat-total-saved').innerText = `₹${totalSpent}`;
+    document.getElementById('stat-trees').innerText = trees;
+    document.getElementById('stat-km').innerText = kmSaved;
+
+    // ── Canvas CO2 bar chart (last 7 days) ──
+    const canvas = document.getElementById('co2-chart');
+    if (!canvas) return;
+    canvas.width = canvas.parentElement.clientWidth - 24;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Build data: group trips by day
+    const dayData = {};
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        dayData[key] = 0;
+    }
+    trips.forEach(t => {
+        const day = (t.date || '').slice(0, 10);
+        if (dayData[day] !== undefined) dayData[day] += parseFloat(t.co2 || 0);
+    });
+
+    const days = Object.keys(dayData);
+    const vals = days.map(d => dayData[d]);
+    const maxVal = Math.max(...vals, 0.5);
+
+    ctx.clearRect(0, 0, W, H);
+    const barW = Math.floor(W / days.length) - 6;
+    const teal = '#2DD4BF';
+    const tealDim = 'rgba(45,212,191,0.15)';
+
+    days.forEach((day, i) => {
+        const x = i * (W / days.length) + 3;
+        const barH = Math.max(4, (vals[i] / maxVal) * (H - 16));
+        const y = H - barH;
+
+        // Background bar
+        ctx.fillStyle = tealDim;
+        ctx.beginPath(); ctx.roundRect(x, 8, barW, H - 8, 3); ctx.fill();
+
+        // Value bar with gradient
+        const grad = ctx.createLinearGradient(0, y, 0, H);
+        grad.addColorStop(0, teal);
+        grad.addColorStop(1, 'rgba(45,212,191,0.3)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.roundRect(x, y, barW, barH, 3); ctx.fill();
+
+        // Value label above bar
+        if (vals[i] > 0) {
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 8px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(vals[i].toFixed(1), x + barW / 2, y - 2);
+        }
+    });
+
+    // Day labels
+    const labelsEl = document.getElementById('co2-chart-labels');
+    labelsEl.innerHTML = days.map(d => {
+        const dayName = new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short' });
+        return `<span class="chart-bar-label">${dayName}</span>`;
+    }).join('');
+
+    // ── CO2 Equivalents ──
+    const equivEl = document.getElementById('co2-equivalents');
+    const equivs = [
+        { icon: '🌳', label: 'Trees Planted (Annual)', val: `${trees} trees` },
+        { icon: '🚗', label: 'Car Travel Avoided', val: `${kmSaved} km` },
+        { icon: '💡', label: 'Bulb Hours Powered', val: `${(totalCo2 * 500).toFixed(0)} hrs` },
+        { icon: '📱', label: 'Phone Charges Saved', val: `${(totalCo2 * 1000 / 0.012).toFixed(0)}x` },
+    ];
+    equivEl.innerHTML = equivs.map(e => `
+        <div class="equiv-card">
+            <div class="equiv-icon">${e.icon}</div>
+            <div>
+                <div class="equiv-val">${e.val}</div>
+                <div class="equiv-label">${e.label}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // ── Recent Trips List ──
+    const listEl = document.getElementById('recent-trips-list');
+    if (!trips.length) {
+        listEl.innerHTML = `<div style="text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px;">No trips yet. Book a route to start tracking!</div>`;
+        return;
+    }
+    listEl.innerHTML = trips.slice(0, 8).map(t => {
+        const date = t.date ? new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Unknown';
+        return `<div class="recent-trip-card">
+            <div class="rtc-top">
+                <span class="rtc-route">${t.route || 'Trip'}</span>
+                <span class="rtc-fare">${t.fare}</span>
+            </div>
+            <div class="rtc-segments">${t.segments || ''}</div>
+            <div class="rtc-meta">${date} · ${t.co2} kg CO₂ saved · +${t.pts} pts</div>
+        </div>`;
+    }).join('');
 }
 
 // ─── ROUTE SEARCH ────────────────────────────────────────────────────────
