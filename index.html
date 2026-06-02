@@ -35,6 +35,31 @@
 
             <!-- TAB: PLAN JOURNEY -->
             <div id="tab-plan" class="tab-content active">
+                
+                <!-- FEATURE TOGGLES -->
+                <div class="toggles-container" style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <label class="toggle-label">
+                        <span class="toggle-text">🌧️ Monsoon</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="monsoon-toggle" onchange="toggleMonsoonMode()">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+                    <label class="toggle-label">
+                        <span class="toggle-text">🛡️ Safe Route</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="safe-toggle" onchange="toggleSafeMode()">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+                </div>
+                <div id="monsoon-banner" class="monsoon-banner" style="display: none;">
+                    <i class="fa-solid fa-cloud-showers-heavy"></i> Heavy rain alert! Expect delays & surge pricing. Metro is recommended.
+                </div>
+                <div id="safe-banner" class="safe-banner" style="display: none;">
+                    <i class="fa-solid fa-shield-halved"></i> Safe Mode active. Prioritizing well-lit stations & Cyberabad She Shuttles.
+                </div>
+
                 <div class="search-box">
                     <div class="input-group">
                         <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off" data-i18n-placeholder="search_from">

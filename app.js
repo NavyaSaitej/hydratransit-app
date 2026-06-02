@@ -168,8 +168,13 @@ function setLanguage(lang) {
 let map, directionsService, originAutocomplete, destAutocomplete;
 let originPlace = null, destPlace = null;
 let activePolylines = [], activeMarkers = [];
-let currentRoutes = [], selectedRouteIdx = -1;
-let selectedPassType = 'single';
+let destinationCoords = null;
+let selectedRouteIdx = 0;
+let isMonsoonMode = false;
+let isSafeMode = false;
+
+// Simulated Mock Data
+const HYDERABAD = { lat: 17.3850, lng: 78.4867 };
 
 let wallet = {
     points: parseInt(localStorage.getItem('ht_pts')) || 0,
@@ -454,16 +459,56 @@ function processAndSortRoutes() {
             // Penalize Auto Usage heavily
             let cabCount = 0;
             let cabDist = 0;
-            r.segments.forEach(s => { if (s.type === 'cab') { cabCount++; cabDist += s.dist; } });
+            let walkDist = 0;
+            let metroDist = 0;
+            r.segments.forEach(s => { 
+                if (s.type === 'cab') { cabCount++; cabDist += s.dist; } 
+                if (s.type === 'walk') { walkDist += s.dist; }
+                if (s.type === 'metro') { metroDist += s.dist; }
+            });
             const cabPenalty = (cabCount * 100) + (cabDist * 10); // Massive penalty for autos
 
-            const score = (r.durationValue / 60) * 2 + fValue - (co2 * 10) + cabPenalty;
+            let monsoonPenalty = 0;
+            if (isMonsoonMode) {
+                // Massive penalty for walking and cabs during heavy rain
+                monsoonPenalty = (walkDist * 100) + (cabDist * 150);
+                // Bonus for taking metro (dry, safe)
+                monsoonPenalty -= (metroDist * 10);
+                
+                // Simulated surge pricing for cabs
+                if (cabDist > 0 && fValue > 0) {
+                    const surgeFare = Math.round(fValue * 1.5);
+                    r.fare = `₹${surgeFare}`;
+                }
+            }
+
+            let safePenalty = 0;
+            if (isSafeMode) {
+                // Penalty for walking (to avoid dark/unsafe areas)
+                safePenalty = (walkDist * 150);
+                
+                // Dynamically rename buses to She Shuttles for the demo
+                r.segments.forEach(s => {
+                    if (s.type === 'bus') {
+                        s.name = "Cyberabad She Shuttle";
+                        s.color = "#ec4899"; // pink color
+                    }
+                });
+            }
+
+            const score = (r.durationValue / 60) * 2 + fValue - (co2 * 10) + cabPenalty + monsoonPenalty + safePenalty;
             if (score < bestScore) {
                 bestScore = score;
                 bestOverallIdx = i;
             }
         });
         transitRoutes[bestOverallIdx].bestOverall = true;
+        if (isMonsoonMode) {
+            transitRoutes[bestOverallIdx].rainSafe = true;
+        }
+        if (isSafeMode) {
+            transitRoutes[bestOverallIdx].safeRoute = true;
+        }
 
         // Sort: Best Overall, then Fastest, then Eco, then others
         transitRoutes.sort((a, b) => {
@@ -651,10 +696,12 @@ function renderRouteCards() {
         <div class="route-card glass-card ${r.bestOverall?'recommended':''} ${r.baseline?'baseline':''}"
              onclick="selectRoute(${i})" style="animation-delay:${i*80}ms">
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                ${r.bestOverall ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background: linear-gradient(135deg, #FFD700, #F7931A); color:#000;">🌟 Best Overall</div>' : ''}
+                ${r.bestOverall && !r.rainSafe && !r.safeRoute ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background: linear-gradient(135deg, #FFD700, #F7931A); color:#000;">🌟 Best Overall</div>' : ''}
+                ${r.rainSafe ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background: #3B82F6; color:#FFF;">☔ Rain Safe</div>' : ''}
+                ${r.safeRoute ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background: #34A853; color:#FFF;">🛡️ Safe Route</div>' : ''}
                 ${r.recommended ? '<div class="route-badge eco" style="position:relative; top:0; right:0; margin:0;">🌿 Eco Best</div>' : ''}
                 ${r.fastest ? '<div class="route-badge fastest" style="position:relative; top:0; right:0; margin:0;">⚡ Fastest</div>' : ''}
-                ${r.cheapest ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background:#10b981;">💰 Cheapest</div>' : ''}
+                ${r.cheapest ? '<div class="route-badge" style="position:relative; top:0; right:0; margin:0; background:#10b981; color:#fff;">💰 Cheapest</div>' : ''}
                 ${r.baseline ? '<div class="route-badge warn" style="position:relative; top:0; right:0; margin:0;">⚠ Baseline</div>' : ''}
             </div>
             <div class="route-header">
@@ -1359,4 +1406,38 @@ async function generateAllSyntheticRoutes(o, d) {
         buildTrueMultiModal(o, d, 1)
     ]);
     return routes.filter(r => r !== null);
+}
+
+function toggleMonsoonMode() {
+    isMonsoonMode = document.getElementById('monsoon-toggle').checked;
+    const banner = document.getElementById('monsoon-banner');
+    if (isMonsoonMode) {
+        banner.style.display = 'flex';
+        showToast('Monsoon Active', 'Simulating heavy rain. Expect surge pricing for autos.');
+    } else {
+        banner.style.display = 'none';
+        showToast('Monsoon Off', 'Normal weather routing restored.');
+    }
+    
+    // Recalculate routes if origin and dest exist
+    if (originPlace && destPlace) {
+        findRoutes();
+    }
+}
+
+function toggleSafeMode() {
+    isSafeMode = document.getElementById('safe-toggle').checked;
+    const banner = document.getElementById('safe-banner');
+    if (isSafeMode) {
+        banner.style.display = 'flex';
+        showToast('Safe Mode Active', 'Prioritizing secure, well-lit routes.');
+    } else {
+        banner.style.display = 'none';
+        showToast('Safe Mode Off', 'Standard routing restored.');
+    }
+    
+    // Recalculate routes if origin and dest exist
+    if (originPlace && destPlace) {
+        findRoutes();
+    }
 }
