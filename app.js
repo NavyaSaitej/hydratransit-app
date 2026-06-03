@@ -297,45 +297,6 @@ const EBIKE_STATIONS = [
   },
 ];
 
-// ─── STREAK MILESTONES DEFINITION ────────────────────────────────────────
-const STREAK_MILESTONES = [
-  {
-    days: 3,
-    emoji: '🌱',
-    label: { en: '3-Day', te: '3 రోజులు', hi: '3 दिन' },
-    bonus: '1.1x',
-    color: '#66BB6A',
-  },
-  {
-    days: 5,
-    emoji: '🌿',
-    label: { en: '5-Day', te: '5 రోజులు', hi: '5 दिन' },
-    bonus: '1.3x',
-    color: '#43A047',
-  },
-  {
-    days: 10,
-    emoji: '🔥',
-    label: { en: '10-Day', te: '10 రోజులు', hi: '10 दिन' },
-    bonus: '1.5x',
-    color: '#E65100',
-  },
-  {
-    days: 21,
-    emoji: '⚡',
-    label: { en: '21-Day', te: '21 రోజులు', hi: '21 दिन' },
-    bonus: '2.0x',
-    color: '#F9A825',
-  },
-  {
-    days: 30,
-    emoji: '🏆',
-    label: { en: '30-Day', te: '30 రోజులు', hi: '30 दिन' },
-    bonus: '2.5x',
-    color: '#FF6F00',
-  },
-];
-
 // ─── PASS TYPES ──────────────────────────────────────────────────────────
 const PASS_TYPES = [
   {
@@ -641,7 +602,6 @@ function initMap() {
   setLanguage(savedLang);
   updateWalletUI();
   resetDailyCaps();
-  renderStreakMilestones();
   renderStreakCalendar();
   renderEbikes();
   if (document.getElementById('sidebar')?.classList.contains('collapsed')) {
@@ -2077,7 +2037,6 @@ function updateWalletUI() {
   if (c) c.textContent = wallet.co2.toFixed(1);
   if (d) d.textContent = `${wallet.ptsToday}/${ECO_MODEL.caps.daily}`;
   if (s) s.textContent = wallet.streak;
-  renderStreakMilestones();
   renderStreakCalendar();
 }
 
@@ -2952,7 +2911,6 @@ function setLanguage(lang) {
   renderStore();
   renderPassTypes();
   renderEbikes();
-  renderStreakMilestones();
   if (selectedRouteIdx !== -1) {
     updatePassForRoute(currentRoutes[selectedRouteIdx]);
   }
@@ -3003,34 +2961,6 @@ function toggleSidebar() {
   if (google && google.maps && map) {
     google.maps.event.trigger(map, 'resize');
   }
-}
-
-// ─── ECO STREAKS: MILESTONE BADGES ───────────────────────────────────────
-function renderStreakMilestones() {
-  const container = document.getElementById('streak-milestones');
-  if (!container) return;
-  const streak = wallet.streak;
-
-  container.innerHTML = STREAK_MILESTONES.map((ms) => {
-    const achieved = streak >= ms.days;
-    const isCurrent =
-      !achieved &&
-      streak < ms.days &&
-      (ms === STREAK_MILESTONES[0] ||
-        streak >= STREAK_MILESTONES[STREAK_MILESTONES.indexOf(ms) - 1]?.days);
-    const progress = achieved
-      ? 100
-      : Math.min(100, Math.round((streak / ms.days) * 100));
-    const label = ms.label[currentLanguage] || ms.label.en;
-
-    return `<div class="milestone-card ${achieved ? 'achieved' : ''} ${isCurrent ? 'current' : ''}">
-            <div class="ms-ring" style="--ms-color:${ms.color}; --ms-progress:${progress}%;">
-                <div class="ms-ring-inner">${achieved ? '✓' : ms.emoji}</div>
-            </div>
-            <div class="ms-label">${label}</div>
-            <div class="ms-bonus">${ms.bonus} pts</div>
-        </div>`;
-  }).join('');
 }
 
 // ─── ECO STREAKS: 14-DAY CALENDAR HEATMAP ────────────────────────────────
