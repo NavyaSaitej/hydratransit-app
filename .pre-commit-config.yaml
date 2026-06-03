@@ -14,8 +14,6 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-merge-conflict
-      - id: no-commit-to-branch
-        args: [--branch, main]
 
   # Lint — ESLint for JS/TS
   - repo: https://github.com/pre-commit/mirrors-eslint

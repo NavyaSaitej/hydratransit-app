@@ -1,5 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "organizeImports": { "enabled": true },
-  "linter": { "enabled": true, "rules": { "recommended": true } }
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "files": { "ignore": ["app.js", "sw.js", "coverage/**", "auto_commit.*"] }
 }

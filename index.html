@@ -1,284 +1,655 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HydraTransit - Premium Hyderabad Commute</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
     <div id="app-layout">
-        <!-- SIDEBAR -->
-        <aside id="sidebar">
-            <div class="sb-header">
-                <div class="sb-header-top">
-                    <div class="sb-brand" data-i18n="brand_name">
-                        <i class="fa-solid fa-route"></i> HydraTransit
-                    </div>
-                    <div class="sb-controls">
-                        <button id="theme-toggle-btn" class="ctrl-btn" onclick="toggleTheme()" title="Toggle Theme">
-                            <i class="fa-solid fa-moon"></i>
-                        </button>
-                        <button id="sidebar-collapse-btn" class="ctrl-btn" onclick="toggleSidebar()" title="Collapse Sidebar">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="lang-selector">
-                    <button class="lang-btn active" id="lang-en" onclick="setLanguage('en')">EN</button>
-                    <button class="lang-btn" id="lang-te" onclick="setLanguage('te')">తెలుగు</button>
-                    <button class="lang-btn" id="lang-hi" onclick="setLanguage('hi')">हिन्दी</button>
-                </div>
+      <!-- SIDEBAR -->
+      <aside id="sidebar">
+        <div class="sb-header">
+          <div class="sb-header-top">
+            <div class="sb-brand" data-i18n="brand_name">
+              <i class="fa-solid fa-route"></i> HydraTransit
             </div>
-            
-            <div class="sb-tabs">
-                <button class="tab-btn active" onclick="switchTab('plan', this)"><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="tab_plan">Plan</span></button>
-                <button class="tab-btn" onclick="switchTab('pass', this)"><i class="fa-solid fa-ticket"></i> <span data-i18n="tab_pass">Pass</span></button>
-                <button class="tab-btn" onclick="switchTab('eco', this)"><i class="fa-solid fa-leaf"></i> <span data-i18n="tab_eco">Eco</span></button>
-                <button class="tab-btn" onclick="switchTab('ble', this)"><i class="fa-solid fa-satellite-dish"></i> <span data-i18n="tab_live">Live</span></button>
-                <button class="tab-btn" onclick="switchTab('stats', this)"><i class="fa-solid fa-chart-column"></i> <span>Stats</span></button>
+            <div class="sb-controls">
+              <button
+                id="theme-toggle-btn"
+                class="ctrl-btn"
+                onclick="toggleTheme()"
+                title="Toggle Theme"
+              >
+                <i class="fa-solid fa-moon"></i>
+              </button>
+              <button
+                id="sidebar-collapse-btn"
+                class="ctrl-btn"
+                onclick="toggleSidebar()"
+                title="Collapse Sidebar"
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
             </div>
-
-            <!-- TAB: PLAN JOURNEY -->
-            <div id="tab-plan" class="tab-content active">
-                
-                <!-- FEATURE TOGGLES -->
-                <div class="toggles-container" style="display: flex; justify-content: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
-                    <label class="toggle-label">
-                        <span class="toggle-text">🌧️ Monsoon</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="monsoon-toggle" onchange="toggleMonsoonMode()">
-                            <span class="slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span class="toggle-text">🛡️ Safe Route</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="safe-toggle" onchange="toggleSafeMode()">
-                            <span class="slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span class="toggle-text">🗣️ Voice Guide</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="voice-toggle" onchange="toggleVoiceMode()">
-                            <span class="slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span class="toggle-text">🚲 E-Bike</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="ebike-toggle" onchange="toggleEbikeMode()">
-                            <span class="slider"></span>
-                        </div>
-                    </label>
-                </div>
-                <div id="monsoon-banner" class="monsoon-banner" style="display: none;">
-                    <i class="fa-solid fa-cloud-showers-heavy"></i> Heavy rain alert! Expect delays & surge pricing. Metro is recommended.
-                </div>
-                <div id="safe-banner" class="safe-banner" style="display: none;">
-                    <i class="fa-solid fa-shield-halved"></i> Safe Mode active. Prioritizing well-lit stations & Cyberabad She Shuttles.
-                </div>
-
-                <div class="search-box">
-                    <div class="input-group">
-                        <input type="text" id="origin-input" class="origin-icon" placeholder="Where from?" autocomplete="off" data-i18n-placeholder="placeholder_from">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="dest-input" placeholder="Where to?" autocomplete="off" data-i18n-placeholder="placeholder_to">
-                        <i class="fa-solid fa-flag-checkered"></i>
-                    </div>
-                    <button class="search-btn" onclick="triggerSearch()" id="find-btn" data-i18n="btn_find_routes">Find Best Routes</button>
-                </div>
-                <div id="routes-list" class="routes-container">
-                    <!-- Route cards injected here -->
-                    <div style="text-align:center; padding: 20px; color: var(--text-tertiary); font-size: 13px;">
-                        <i class="fa-solid fa-map-location-dot" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i><br>
-                        <span data-i18n="plan_welcome">Enter any address in Hyderabad to find multi-modal transit routes.</span>
-                    </div>
-                </div>
-                </div>
-                
-                <!-- GROUP PASS SECTION -->
-                <div class="group-pass-container" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding:12px; background:var(--surface-raised); border-radius:8px; border:1px solid var(--border-subtle);">
-                    <span style="font-size:13px; font-weight:600;"><i class="fa-solid fa-user-group" style="color:var(--color-primary);margin-right:4px;"></i> Travelers</span>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="ctrl-btn" style="width:28px; height:28px; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updatePassengerCount(-1)"><i class="fa-solid fa-minus" style="font-size:10px;"></i></button>
-                        <span id="passenger-count" style="font-weight:700; width:15px; text-align:center; font-size:14px;">1</span>
-                        <button class="ctrl-btn" style="width:28px; height:28px; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updatePassengerCount(1)"><i class="fa-solid fa-plus" style="font-size:10px;"></i></button>
-                    </div>
-                </div>
-
-                <div style="display:flex; gap:8px; margin-top:12px;">
-                    <button id="book-btn" class="search-btn" onclick="purchasePass()" disabled style="flex:1;">Get Pass</button>
-                    <button id="split-btn" class="search-btn" onclick="openUpiSplit()" disabled style="flex:1; background:var(--surface-raised); color:var(--text-primary); border:1px solid var(--color-primary);"><i class="fa-brands fa-google-pay" style="font-size:16px;"></i> Split</button>
-                </div>
-            </div>
-
-            <!-- TAB: HYDRAPASS -->
-            <div id="tab-pass" class="tab-content">
-                <div class="section-title" data-i18n="title_select_pass">Select Pass Type</div>
-                <div id="pass-type-grid" class="pass-type-grid"></div>
-                <div id="pass-invoice" class="pass-invoice">
-                    <div style="text-align:center;color:var(--text-tertiary);" data-i18n="pass_select_route_first">Select a route first</div>
-                </div>
-                <div class="section-title" data-i18n="title_active_pass">Your Active Pass</div>
-                <div id="ticket-card-area">
-                    <div style="text-align:center; padding: 30px; background: var(--surface-raised); border-radius: 16px; border: 1px dashed var(--border-subtle); color: var(--text-tertiary); font-size: 12px;">
-                        <span data-i18n="pass_empty">No active passes.<br>Book a route to generate a HydraPass.</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: ECO CREDITS -->
-            <div id="tab-eco" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-val"><span id="user-pts">0</span> <i class="fa-solid fa-coins" style="font-size:14px; color:var(--color-primary)"></i></div>
-                        <div class="stat-label" data-i18n="stat_eco_points">Eco Points</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val eco"><span id="user-co2">0.0</span> <span style="font-size:14px;">kg</span></div>
-                        <div class="stat-label" data-i18n="stat_co2_saved">CO₂ Saved</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val"><span id="streak-val">0</span> <i class="fa-solid fa-fire" style="font-size:14px; color:#F44336"></i></div>
-                        <div class="stat-label" data-i18n="stat_streak">Day Streak</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val" style="color:var(--text-primary);"><span id="daily-cap">0/20</span></div>
-                        <div class="stat-label" data-i18n="stat_daily_cap">Daily Cap</div>
-                    </div>
-                </div>
-
-                <!-- STREAK MILESTONES -->
-                <div class="section-title" data-i18n="title_streak_milestones">Streak Milestones</div>
-                <div id="streak-milestones" class="streak-milestones"></div>
-
-                <!-- STREAK CALENDAR -->
-                <div class="section-title" data-i18n="title_streak_calendar">Streak Calendar (Last 14 Days)</div>
-                <div id="streak-calendar" class="streak-calendar"></div>
-
-                <!-- E-BIKE AVAILABILITY -->
-                <div class="section-title" data-i18n="title_ebikes">
-                    <i class="fa-solid fa-bicycle" style="margin-right:4px;"></i> Nearby E-Bikes
-                </div>
-                <div id="ebike-list" class="ebike-list"></div>
-
-                <!-- REWARDS STORE -->
-                <div class="section-title" data-i18n="title_store">Rewards Store</div>
-                <div id="store-list" class="store-list"></div>
-            </div>
-
-            <!-- TAB: BLE RADAR -->
-            <div id="tab-ble" class="tab-content">
-                <div style="background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 16px; display: flex; gap: 10px; font-size: 12px; color: #90CAF9;">
-                    <i class="fa-solid fa-tower-broadcast" style="font-size: 16px; margin-top:2px;"></i>
-                    <div data-i18n="ble_desc">Simulating BLE beacon scans to estimate coach crowding for the next approaching Metro train.</div>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                    <div class="section-title" style="margin:0;" data-i18n="title_coach_density">Coach Density</div>
-                    <span id="ble-timer" style="font-size:10px; font-weight:700; color:var(--color-primary);" data-i18n="ble_scanning">Scanning... 3s</span>
-                </div>
-                <div id="coach-list" class="coach-list"></div>
-            </div>
-
-            <!-- TAB: TRIP STATS -->
-            <div id="tab-stats" class="tab-content">
-                <div class="section-title"><i class="fa-solid fa-chart-pie" style="margin-right:6px;color:var(--color-primary);"></i>Your Travel Analytics</div>
-
-                <!-- Quick Stats Row -->
-                <div class="stats-grid" style="margin-bottom:14px;">
-                    <div class="stat-card">
-                        <div class="stat-val" id="stat-total-trips" style="font-size:22px;">0</div>
-                        <div class="stat-label">Total Trips</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val" id="stat-total-saved" style="font-size:22px;">₹0</div>
-                        <div class="stat-label">Spent</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val eco" id="stat-trees" style="font-size:22px;">0</div>
-                        <div class="stat-label">Trees Equiv.</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-val" id="stat-km" style="font-size:22px;">0</div>
-                        <div class="stat-label">km Saved</div>
-                    </div>
-                </div>
-
-                <!-- CO2 Bar Chart -->
-                <div class="section-title" style="margin-bottom:8px;">CO₂ Saved — Last 7 Days</div>
-                <div style="background:var(--surface-raised); border-radius:12px; padding:12px; border:1px solid var(--border-subtle); margin-bottom:14px;">
-                    <canvas id="co2-chart" height="100"></canvas>
-                    <div id="co2-chart-labels" style="display:flex;justify-content:space-between;margin-top:4px;"></div>
-                </div>
-
-                <!-- CO2 Equivalents Card -->
-                <div class="section-title" style="margin-bottom:8px;">CO₂ Impact Equivalents</div>
-                <div id="co2-equivalents" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;"></div>
-
-                <!-- Recent Trips -->
-                <div class="section-title" style="margin-bottom:8px;">Recent Trips</div>
-                <div id="recent-trips-list" style="display:flex;flex-direction:column;gap:8px;"></div>
-            </div>
-        </aside>
-
-        <!-- MAP CONTAINER -->
-        <main id="map-container">
-            <button id="sidebar-uncollapse-btn" class="ctrl-btn floating-uncollapse" onclick="toggleSidebar()" title="Expand Sidebar" style="display: none;">
-                <i class="fa-solid fa-chevron-right"></i>
+          </div>
+          <div class="lang-selector">
+            <button
+              class="lang-btn active"
+              id="lang-en"
+              onclick="setLanguage('en')"
+            >
+              EN
             </button>
-            <div id="map"></div>
-            <!-- SOS WIDGET -->
-            <button class="sos-btn" onclick="triggerSOS()">
-                <i class="fa-solid fa-triangle-exclamation fa-beat-fade"></i> SOS
+            <button class="lang-btn" id="lang-te" onclick="setLanguage('te')">
+              తెలుగు
             </button>
-        </main>
+            <button class="lang-btn" id="lang-hi" onclick="setLanguage('hi')">
+              हिन्दी
+            </button>
+          </div>
+        </div>
+
+        <div class="sb-tabs">
+          <button class="tab-btn active" onclick="switchTab('plan', this)">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span data-i18n="tab_plan">Plan</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('pass', this)">
+            <i class="fa-solid fa-ticket"></i>
+            <span data-i18n="tab_pass">Pass</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('eco', this)">
+            <i class="fa-solid fa-leaf"></i>
+            <span data-i18n="tab_eco">Eco</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('ble', this)">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span data-i18n="tab_live">Live</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('stats', this)">
+            <i class="fa-solid fa-chart-column"></i> <span>Stats</span>
+          </button>
+        </div>
+
+        <!-- TAB: PLAN JOURNEY -->
+        <div id="tab-plan" class="tab-content active">
+          <!-- FEATURE TOGGLES -->
+          <div
+            class="toggles-container"
+            style="
+              display: flex;
+              justify-content: flex-start;
+              gap: 8px;
+              flex-wrap: wrap;
+              margin-bottom: 12px;
+            "
+          >
+            <label class="toggle-label">
+              <span class="toggle-text">🌧️ Monsoon</span>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="monsoon-toggle"
+                  onchange="toggleMonsoonMode()"
+                />
+                <span class="slider"></span>
+              </div>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-text">🛡️ Safe Route</span>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="safe-toggle"
+                  onchange="toggleSafeMode()"
+                />
+                <span class="slider"></span>
+              </div>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-text">🗣️ Voice Guide</span>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="voice-toggle"
+                  onchange="toggleVoiceMode()"
+                />
+                <span class="slider"></span>
+              </div>
+            </label>
+            <label class="toggle-label">
+              <span class="toggle-text">🚲 E-Bike</span>
+              <div class="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="ebike-toggle"
+                  onchange="toggleEbikeMode()"
+                />
+                <span class="slider"></span>
+              </div>
+            </label>
+          </div>
+          <div id="monsoon-banner" class="monsoon-banner" style="display: none">
+            <i class="fa-solid fa-cloud-showers-heavy"></i> Heavy rain alert!
+            Expect delays & surge pricing. Metro is recommended.
+          </div>
+          <div id="safe-banner" class="safe-banner" style="display: none">
+            <i class="fa-solid fa-shield-halved"></i> Safe Mode active.
+            Prioritizing well-lit stations & Cyberabad She Shuttles.
+          </div>
+
+          <div class="search-box">
+            <div class="input-group">
+              <input
+                type="text"
+                id="origin-input"
+                class="origin-icon"
+                placeholder="Where from?"
+                autocomplete="off"
+                data-i18n-placeholder="placeholder_from"
+              />
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="input-group">
+              <input
+                type="text"
+                id="dest-input"
+                placeholder="Where to?"
+                autocomplete="off"
+                data-i18n-placeholder="placeholder_to"
+              />
+              <i class="fa-solid fa-flag-checkered"></i>
+            </div>
+            <button
+              class="search-btn"
+              onclick="triggerSearch()"
+              id="find-btn"
+              data-i18n="btn_find_routes"
+            >
+              Find Best Routes
+            </button>
+          </div>
+          <div id="routes-list" class="routes-container">
+            <!-- Route cards injected here -->
+            <div
+              style="
+                text-align: center;
+                padding: 20px;
+                color: var(--text-tertiary);
+                font-size: 13px;
+              "
+            >
+              <i
+                class="fa-solid fa-map-location-dot"
+                style="font-size: 24px; margin-bottom: 10px; opacity: 0.5"
+              ></i
+              ><br />
+              <span data-i18n="plan_welcome"
+                >Enter any address in Hyderabad to find multi-modal transit
+                routes.</span
+              >
+            </div>
+          </div>
+
+          <!-- GROUP PASS SECTION -->
+          <div
+            class="group-pass-container"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 15px;
+              padding: 12px;
+              background: var(--surface-raised);
+              border-radius: 8px;
+              border: 1px solid var(--border-subtle);
+            "
+          >
+            <span style="font-size: 13px; font-weight: 600"
+              ><i
+                class="fa-solid fa-user-group"
+                style="color: var(--color-primary); margin-right: 4px"
+              ></i>
+              Travelers</span
+            >
+            <div style="display: flex; align-items: center; gap: 10px">
+              <button
+                class="ctrl-btn"
+                style="
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 50%;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+                onclick="updatePassengerCount(-1)"
+              >
+                <i class="fa-solid fa-minus" style="font-size: 10px"></i>
+              </button>
+              <span
+                id="passenger-count"
+                style="
+                  font-weight: 700;
+                  width: 15px;
+                  text-align: center;
+                  font-size: 14px;
+                "
+                >1</span
+              >
+              <button
+                class="ctrl-btn"
+                style="
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 50%;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+                onclick="updatePassengerCount(1)"
+              >
+                <i class="fa-solid fa-plus" style="font-size: 10px"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 12px">
+            <button
+              id="book-btn"
+              class="search-btn"
+              onclick="purchasePass()"
+              disabled
+              style="flex: 1"
+            >
+              Get Pass
+            </button>
+            <button
+              id="split-btn"
+              class="search-btn"
+              onclick="openUpiSplit()"
+              disabled
+              style="
+                flex: 1;
+                background: var(--surface-raised);
+                color: var(--text-primary);
+                border: 1px solid var(--color-primary);
+              "
+            >
+              <i class="fa-brands fa-google-pay" style="font-size: 16px"></i>
+              Split
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: HYDRAPASS -->
+        <div id="tab-pass" class="tab-content">
+          <div class="section-title" data-i18n="title_select_pass">
+            Select Pass Type
+          </div>
+          <div id="pass-type-grid" class="pass-type-grid"></div>
+          <div id="pass-invoice" class="pass-invoice">
+            <div
+              style="text-align: center; color: var(--text-tertiary)"
+              data-i18n="pass_select_route_first"
+            >
+              Select a route first
+            </div>
+          </div>
+          <div class="section-title" data-i18n="title_active_pass">
+            Your Active Pass
+          </div>
+          <div id="ticket-card-area">
+            <div
+              style="
+                text-align: center;
+                padding: 30px;
+                background: var(--surface-raised);
+                border-radius: 16px;
+                border: 1px dashed var(--border-subtle);
+                color: var(--text-tertiary);
+                font-size: 12px;
+              "
+            >
+              <span data-i18n="pass_empty"
+                >No active passes.<br />Book a route to generate a
+                HydraPass.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: ECO CREDITS -->
+        <div id="tab-eco" class="tab-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-val">
+                <span id="user-pts">0</span>
+                <i
+                  class="fa-solid fa-coins"
+                  style="font-size: 14px; color: var(--color-primary)"
+                ></i>
+              </div>
+              <div class="stat-label" data-i18n="stat_eco_points">
+                Eco Points
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val eco">
+                <span id="user-co2">0.0</span>
+                <span style="font-size: 14px">kg</span>
+              </div>
+              <div class="stat-label" data-i18n="stat_co2_saved">CO₂ Saved</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val">
+                <span id="streak-val">0</span>
+                <i
+                  class="fa-solid fa-fire"
+                  style="font-size: 14px; color: #f44336"
+                ></i>
+              </div>
+              <div class="stat-label" data-i18n="stat_streak">Day Streak</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color: var(--text-primary)">
+                <span id="daily-cap">0/20</span>
+              </div>
+              <div class="stat-label" data-i18n="stat_daily_cap">Daily Cap</div>
+            </div>
+          </div>
+
+          <!-- STREAK MILESTONES -->
+          <div class="section-title" data-i18n="title_streak_milestones">
+            Streak Milestones
+          </div>
+          <div id="streak-milestones" class="streak-milestones"></div>
+
+          <!-- STREAK CALENDAR -->
+          <div class="section-title" data-i18n="title_streak_calendar">
+            Streak Calendar (Last 14 Days)
+          </div>
+          <div id="streak-calendar" class="streak-calendar"></div>
+
+          <!-- E-BIKE AVAILABILITY -->
+          <div class="section-title" data-i18n="title_ebikes">
+            <i class="fa-solid fa-bicycle" style="margin-right: 4px"></i> Nearby
+            E-Bikes
+          </div>
+          <div id="ebike-list" class="ebike-list"></div>
+
+          <!-- REWARDS STORE -->
+          <div class="section-title" data-i18n="title_store">Rewards Store</div>
+          <div id="store-list" class="store-list"></div>
+        </div>
+
+        <!-- TAB: BLE RADAR -->
+        <div id="tab-ble" class="tab-content">
+          <div
+            style="
+              background: rgba(33, 150, 243, 0.1);
+              border: 1px solid rgba(33, 150, 243, 0.2);
+              padding: 12px;
+              border-radius: 8px;
+              margin-bottom: 16px;
+              display: flex;
+              gap: 10px;
+              font-size: 12px;
+              color: #90caf9;
+            "
+          >
+            <i
+              class="fa-solid fa-tower-broadcast"
+              style="font-size: 16px; margin-top: 2px"
+            ></i>
+            <div data-i18n="ble_desc">
+              Simulating BLE beacon scans to estimate coach crowding for the
+              next approaching Metro train.
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 12px;
+            "
+          >
+            <div
+              class="section-title"
+              style="margin: 0"
+              data-i18n="title_coach_density"
+            >
+              Coach Density
+            </div>
+            <span
+              id="ble-timer"
+              style="
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--color-primary);
+              "
+              data-i18n="ble_scanning"
+              >Scanning... 3s</span
+            >
+          </div>
+          <div id="coach-list" class="coach-list"></div>
+        </div>
+
+        <!-- TAB: TRIP STATS -->
+        <div id="tab-stats" class="tab-content">
+          <div class="section-title">
+            <i
+              class="fa-solid fa-chart-pie"
+              style="margin-right: 6px; color: var(--color-primary)"
+            ></i
+            >Your Travel Analytics
+          </div>
+
+          <!-- Quick Stats Row -->
+          <div class="stats-grid" style="margin-bottom: 14px">
+            <div class="stat-card">
+              <div
+                class="stat-val"
+                id="stat-total-trips"
+                style="font-size: 22px"
+              >
+                0
+              </div>
+              <div class="stat-label">Total Trips</div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-val"
+                id="stat-total-saved"
+                style="font-size: 22px"
+              >
+                ₹0
+              </div>
+              <div class="stat-label">Spent</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val eco" id="stat-trees" style="font-size: 22px">
+                0
+              </div>
+              <div class="stat-label">Trees Equiv.</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="stat-km" style="font-size: 22px">0</div>
+              <div class="stat-label">km Saved</div>
+            </div>
+          </div>
+
+          <!-- CO2 Bar Chart -->
+          <div class="section-title" style="margin-bottom: 8px">
+            CO₂ Saved — Last 7 Days
+          </div>
+          <div
+            style="
+              background: var(--surface-raised);
+              border-radius: 12px;
+              padding: 12px;
+              border: 1px solid var(--border-subtle);
+              margin-bottom: 14px;
+            "
+          >
+            <canvas id="co2-chart" height="100"></canvas>
+            <div
+              id="co2-chart-labels"
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-top: 4px;
+              "
+            ></div>
+          </div>
+
+          <!-- CO2 Equivalents Card -->
+          <div class="section-title" style="margin-bottom: 8px">
+            CO₂ Impact Equivalents
+          </div>
+          <div
+            id="co2-equivalents"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              margin-bottom: 14px;
+            "
+          ></div>
+
+          <!-- Recent Trips -->
+          <div class="section-title" style="margin-bottom: 8px">
+            Recent Trips
+          </div>
+          <div
+            id="recent-trips-list"
+            style="display: flex; flex-direction: column; gap: 8px"
+          ></div>
+        </div>
+      </aside>
+
+      <!-- MAP CONTAINER -->
+      <main id="map-container">
+        <button
+          id="sidebar-uncollapse-btn"
+          class="ctrl-btn floating-uncollapse"
+          onclick="toggleSidebar()"
+          title="Expand Sidebar"
+          style="display: none"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <div id="map"></div>
+        <!-- SOS WIDGET -->
+        <button class="sos-btn" onclick="triggerSOS()">
+          <i class="fa-solid fa-triangle-exclamation fa-beat-fade"></i> SOS
+        </button>
+      </main>
     </div>
 
     <!-- TOAST -->
     <div id="toast">
-        <i class="fa-solid fa-circle-check"></i>
-        <div>
-            <h5 id="toast-title">Success</h5>
-            <p id="toast-desc">Action completed.</p>
-        </div>
+      <i class="fa-solid fa-circle-check"></i>
+      <div>
+        <h5 id="toast-title">Success</h5>
+        <p id="toast-desc">Action completed.</p>
+      </div>
     </div>
 
     <!-- UPI SPLIT MODAL -->
-    <div id="upi-modal" class="modal" style="display: none;">
-        <div class="modal-content" style="text-align:center;">
-            <h2>Split with Friends</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 15px; font-size:13px;">Ask your friends to scan this QR to pay their share (<span id="upi-share-amount">₹0</span> each).</p>
-            <div style="background:white; padding:15px; border-radius:12px; display:inline-block; margin-bottom:15px;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=hydratransit@upi&am=0&cu=INR" id="upi-qr-img" width="150" height="150" style="display:block;">
-            </div>
-            <div id="upi-status" style="margin-bottom:15px; font-size:14px; font-weight:600; color:var(--color-primary);">
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for 3 payments...
-            </div>
-            <button onclick="cancelUpiSplit()" class="search-btn" style="background:var(--surface-raised); color:var(--text-primary); border:1px solid var(--border-subtle);">Cancel</button>
+    <div id="upi-modal" class="modal" style="display: none">
+      <div class="modal-content" style="text-align: center">
+        <h2>Split with Friends</h2>
+        <p
+          style="
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 13px;
+          "
+        >
+          Ask your friends to scan this QR to pay their share (<span
+            id="upi-share-amount"
+            >₹0</span
+          >
+          each).
+        </p>
+        <div
+          style="
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+          "
+        >
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=hydratransit@upi&am=0&cu=INR"
+            id="upi-qr-img"
+            width="150"
+            height="150"
+            style="display: block"
+          />
         </div>
+        <div
+          id="upi-status"
+          style="
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+          "
+        >
+          <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for 3
+          payments...
+        </div>
+        <button
+          onclick="cancelUpiSplit()"
+          class="search-btn"
+          style="
+            background: var(--surface-raised);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+          "
+        >
+          Cancel
+        </button>
+      </div>
     </div>
 
-
     <!-- FLOATING VOICE NAVIGATION PLAYER -->
-    <div id="voice-player" class="voice-player glass-card" style="display: none;">
-        <div class="vp-icon">
-            <i class="fa-solid fa-microphone-lines fa-bounce"></i>
-        </div>
-        <div class="vp-content">
-            <div class="vp-title">Voice Navigation</div>
-            <div id="vp-text" class="vp-text">Loading instructions...</div>
-        </div>
-        <button class="vp-close" onclick="closeVoicePlayer()"><i class="fa-solid fa-times"></i></button>
+    <div
+      id="voice-player"
+      class="voice-player glass-card"
+      style="display: none"
+    >
+      <div class="vp-icon">
+        <i class="fa-solid fa-microphone-lines fa-bounce"></i>
+      </div>
+      <div class="vp-content">
+        <div class="vp-title">Voice Navigation</div>
+        <div id="vp-text" class="vp-text">Loading instructions...</div>
+      </div>
+      <button class="vp-close" onclick="closeVoicePlayer()">
+        <i class="fa-solid fa-times"></i>
+      </button>
     </div>
 
     <!-- SCRIPTS -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnZY3jsHmETt-mbEBKMpaRMGKEiuwCsvc&libraries=places&callback=initMap"></script>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnZY3jsHmETt-mbEBKMpaRMGKEiuwCsvc&libraries=places&callback=initMap"
+    ></script>
     <script src="app.js"></script>
-</body>
+  </body>
 </html>
 <!-- cache-bust: 2026-06-03T09:32:28 -->
