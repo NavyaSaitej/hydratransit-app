@@ -1176,10 +1176,19 @@ input:checked ~ .toggle-text {
   gap: 8px;
   margin-bottom: 18px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 .streak-milestones::-webkit-scrollbar {
-  height: 3px;
+  height: 6px;
+}
+.streak-milestones::-webkit-scrollbar-track {
+  background: var(--surface-raised);
+  border-radius: 3px;
+}
+.streak-milestones::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
 }
 
 .milestone-card {
@@ -1254,6 +1263,7 @@ input:checked ~ .toggle-text {
 }
 .streak-day {
   aspect-ratio: 1;
+  min-height: 45px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -1405,6 +1415,7 @@ input:checked ~ .toggle-text {
   color: var(--text-secondary);
 }
 .battery-gauge {
+  display: inline-block;
   width: 28px;
   height: 12px;
   border-radius: 2px;
@@ -1423,6 +1434,7 @@ input:checked ~ .toggle-text {
   border-radius: 0 1px 1px 0;
 }
 .battery-fill {
+  display: block;
   height: 100%;
   border-radius: 1px;
   transition: width 0.5s ease;
