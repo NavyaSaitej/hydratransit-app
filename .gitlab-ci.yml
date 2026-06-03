@@ -6,47 +6,65 @@ stages:
   - type_check
   - test
   - coverage
+  - security
   - deploy
+
+default:
+  image: node:20
+  before_script:
+    - npm ci --prefer-offline || npm install
 
 lint:
   stage: lint
-  image: node:latest
   script:
-    - echo "Running biome linter..."
-  allow_failure: true
+    - npx eslint . --ext .js,.ts
+    - npx biome ci .
+  allow_failure: false
 
 format:
   stage: format
-  image: node:latest
   script:
-    - echo "Running formatter..."
-  allow_failure: true
+    - npx prettier --check .
+    - npx biome format .
+  allow_failure: false
 
 type_check:
   stage: type_check
-  image: node:latest
   script:
-    - echo "Running type checking with knip..."
-  allow_failure: true
+    - npx tsc --noEmit
+  allow_failure: false
 
 test:
   stage: test
-  image: node:latest
   script:
-    - echo "Running tests..."
-  allow_failure: true
+    - npx jest --coverage
+  coverage: '/Statements\s*:\s*([\d.]+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+  allow_failure: false
 
 coverage:
   stage: coverage
-  image: node:latest
   script:
-    - echo "Generating coverage report..."
+    - npx jest --coverage --coverageReporters=text-summary
+    - echo "Coverage report generated"
+  artifacts:
+    paths:
+      - coverage/
+  allow_failure: true
+
+dependency_audit:
+  stage: security
+  script:
+    - npm audit --audit-level=high
   allow_failure: true
 
 # GitLab Pages hosting template
 pages:
   stage: deploy
-  image: node:latest
   script:
     - mkdir .public
     - cp -r * .public
